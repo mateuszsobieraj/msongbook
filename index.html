@@ -118,12 +118,13 @@
         .chords-only-line.empty { height: 12px; }
         @media (max-width:600px) { .chords-only-line { font-size: 1.05rem; } }
 
-        /* Large chords-only display when in focused song-only mode */
+        /* Large chords-only display when in focused song-only mode (tighter and scrollable) */
+        body.song-open.only-chords .song-detail { overflow-y: auto; max-height: calc(100vh - 80px); padding: 6px; }
         body.song-open.only-chords .song-detail .chords { padding: 6px; }
-        body.song-open.only-chords .chords-only-line { font-size: 2.8rem; text-align:center; padding: 14px 0; height: auto; }
-        body.song-open.only-chords .chords-only-line.empty { height: 18px; }
+        body.song-open.only-chords .chords-only-line { font-size: 2.0rem; text-align:center; padding: 8px 0; line-height: 1.12; height: auto; }
+        body.song-open.only-chords .chords-only-line.empty { height: 12px; }
         @media (max-width:600px) {
-            body.song-open.only-chords .chords-only-line { font-size: 3.8rem; padding: 18px 0; }
+            body.song-open.only-chords .chords-only-line { font-size: 2.4rem; padding: 10px 0; }
         }
 
         .search-box input:focus {
@@ -258,9 +259,10 @@
             .search-box input { padding: 10px; font-size: 0.98rem; }
 
             /* Ensure chords-only uses most of the viewport but still fits — center content */
-            body.song-open.only-chords .song-detail { display:flex; align-items:center; justify-content:center; padding:6px; height: calc(100vh - 80px); }
-            body.song-open.only-chords .song-detail .chords { border-left: none; background: transparent; padding: 0; }
-            body.song-open.only-chords .chords-only-line { font-size: 3.2rem; line-height: 1.0; padding: 10px 0; }
+            /* Only-chords: keep controls at top, make chords area scrollable and centered */
+            body.song-open.only-chords .song-detail { padding: 6px; }
+            body.song-open.only-chords .song-detail .chords { border-left: none; background: transparent; padding: 0; max-height: calc(100vh - 120px); overflow-y: auto; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; }
+            body.song-open.only-chords .chords-only-line { font-size: 2.4rem; line-height: 1.12; padding: 10px 0; }
         }
 
         .back-button {
@@ -384,8 +386,8 @@
             <div class="top-controls">
                 <button class="back-button" id="backButton" onclick="app.showList()">←</button>
                 <div class="song-controls">
-                    <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full</button>
-                    <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords</button>
+                    <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full view</button>
+                    <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords only</button>
                 </div>
             </div>
             <h2 id="songTitle"></h2>
