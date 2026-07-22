@@ -257,24 +257,24 @@
                 <input 
                     type="text" 
                     id="searchInput" 
-                    placeholder="Szukaj po tytule lub artyście..."
+                    placeholder="Search by title or artist..."
                     autocomplete="off"
                 >
-                <button onclick="app.search()">Szukaj</button>
+                <button onclick="app.search()">Search</button>
             </div>
         </div>
 
-        <button class="back-button" id="backButton" onclick="app.showList()">← Wróć do listy</button>
-        <button class="back-button" id="toggleChords" onclick="app.toggleChords()">Pokaż akordy</button>
+        <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
+        <button class="back-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
 
         <div id="listView">
             <div id="songList" class="song-list"></div>
             <div id="noResults" class="no-results" style="display: none;">
-                Brak wyników wyszukiwania. Spróbuj innego hasła.
+                No results. Try a different query.
             </div>
             <div id="emptyState" class="empty-state" style="display: none;">
-                <h2>🎼 Twój śpiewnik jest pusty</h2>
-                <p>Dodaj swoje pierwsze piosenki w formacie ChordPro</p>
+                <h2>🎼 Your songbook is empty</h2>
+                <p>Add your first songs in ChordPro format</p>
             </div>
         </div>
 
@@ -386,7 +386,7 @@ Chorus:
                     document.getElementById('backButton').classList.add('active');
                     document.getElementById('toggleChords').classList.add('active');
                     // Update toggle button label
-                    document.getElementById('toggleChords').textContent = this.showChordSymbols ? 'Ukryj akordy' : 'Pokaż akordy';
+                    document.getElementById('toggleChords').textContent = this.showChordSymbols ? 'Hide chords' : 'Show chords';
                 };
 
                 const chooseAndDisplay = () => {
@@ -416,7 +416,7 @@ Chorus:
                         this.currentSong.chords = this.parseChordPro(text);
                         chooseAndDisplay();
                     }).catch(() => {
-                        display('Nie można załadować treści piosenki.');
+                        display('Unable to load song content.');
                     });
                 } else {
                     chooseAndDisplay();
@@ -471,7 +471,7 @@ Chorus:
                 const btn = document.getElementById('toggleChords');
                 if (btn) btn.textContent = this.showChordSymbols ? 'Ukryj akordy' : 'Pokaż akordy';
                 if (this.currentSong) {
-                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'Brak treści');
+                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'No content');
                     document.getElementById('songChords').textContent = textToShow;
                 }
             },
