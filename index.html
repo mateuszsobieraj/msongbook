@@ -159,15 +159,27 @@
         }
 
         .song-detail .chords {
-            background: #f5f5f5;
-            padding: 20px;
+            background: #fefefe;
+            padding: 18px 16px;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
             word-wrap: break-word;
-            line-height: 1.8;
-            color: #333;
+            line-height: 1.7;
+            color: #111;
             border-left: 4px solid #667eea;
+            font-size: 1.05rem;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 600px) {
+            body { padding: 12px; }
+            .container { padding: 0 6px; }
+            header h1 { font-size: 1.8rem; }
+            .song-card h3 { font-size: 1.05rem; }
+            .song-detail { padding: 20px; }
+            .song-detail .chords { font-size: 1.15rem; line-height: 1.6; padding: 18px; }
+            .search-box input { padding: 12px; font-size: 1rem; }
         }
 
         .back-button {
@@ -235,6 +247,7 @@
         </div>
 
         <button class="back-button" id="backButton" onclick="app.showList()">← Wróć do listy</button>
+        <button class="back-button" id="toggleChords" onclick="app.toggleChords()">Pokaż akordy</button>
 
         <div id="listView">
             <div id="songList" class="song-list"></div>
@@ -258,6 +271,7 @@
         const app = {
             songs: [],
             currentSong: null,
+            showChordSymbols: false,
 
             init() {
                 this.loadSongs();
@@ -344,19 +358,33 @@ Chorus:
                 this.currentSong = this.songs.find(s => s.id === id);
                 if (!this.currentSong) return;
 
-                const display = (chordsText) => {
+                const display = (textToShow) => {
                     document.getElementById('songTitle').textContent = this.currentSong.title;
                     document.getElementById('songArtist').textContent = this.currentSong.artist;
-                    document.getElementById('songChords').textContent = chordsText;
+                    document.getElementById('songChords').textContent = textToShow;
 
                     document.getElementById('listView').style.display = 'none';
                     document.getElementById('detailView').classList.add('active');
                     document.getElementById('backButton').classList.add('active');
+                    document.getElementById('toggleChords').classList.add('active');
+                    // Update toggle button label
+                    document.getElementById('toggleChords').textContent = this.showChordSymbols ? 'Ukryj akordy' : 'Pokaż akordy';
                 };
 
-                if (this.currentSong.chords) {
-                    // Parse stored chords to remove ChordPro tags before display
-                    display(this.parseChordPro(this.currentSong.chords));
+                const chooseAndDisplay = () => {
+                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'Brak treści');
+                    display(textToShow);
+                };
+
+                if (this.currentSong.chords && !this.currentSong.rawChords) {
+                    // already parsed-only stored; no raw available
+                    chooseAndDisplay();
+                    return;
+                }
+
+                if (this.currentSong.rawChords) {
+                    // we already fetched raw content earlier
+                    chooseAndDisplay();
                     return;
                 }
 
@@ -365,15 +393,15 @@ Chorus:
                         if (!res.ok) throw new Error('Failed to load');
                         return res.text();
                     }).then(text => {
-                        // Parse fetched ChordPro file and store parsed text
-                        const parsed = this.parseChordPro(text);
-                        this.currentSong.chords = parsed;
-                        display(parsed);
+                        // Store both raw and parsed forms
+                        this.currentSong.rawChords = text;
+                        this.currentSong.chords = this.parseChordPro(text);
+                        chooseAndDisplay();
                     }).catch(() => {
                         display('Nie można załadować treści piosenki.');
                     });
                 } else {
-                    display(this.parseChordPro(this.currentSong.chords || 'Brak treści'));
+                    chooseAndDisplay();
                 }
             },
 
@@ -420,15 +448,25 @@ Chorus:
                 this.renderList();
             },
 
+            toggleChords() {
+                this.showChordSymbols = !this.showChordSymbols;
+                const btn = document.getElementById('toggleChords');
+                if (btn) btn.textContent = this.showChordSymbols ? 'Ukryj akordy' : 'Pokaż akordy';
+                if (this.currentSong) {
+                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'Brak treści');
+                    document.getElementById('songChords').textContent = textToShow;
+                }
+            },
+
             parseChordPro(text) {
                 if (!text) return '';
                 // Remove ChordPro directives in braces {meta: ...} and chords in brackets [C], [G7] etc.
                 let t = text.replace(/\{[^}]*\}/g, '');
                 t = t.replace(/\[[^\]]*\]/g, '');
-                // Remove stray multiple blank lines and normalize newlines
+                // Normalize newlines and remove excessive empty lines
                 t = t.replace(/\r/g, '');
                 t = t.replace(/\n{3,}/g, '\n\n');
-                // Trim whitespace at line ends
+                // Trim trailing whitespace on lines and overall
                 t = t.split('\n').map(l => l.replace(/\s+$/,'' )).join('\n');
                 return t.trim();
             },
