@@ -197,6 +197,16 @@
             font-size: 1.05rem;
         }
 
+                /* Focused/song-open view: hide search and emphasize lyrics */
+                body.song-open .header-search { display: none; }
+                body.song-open header { padding: 8px 0; }
+                body.song-open header h1 { font-size: 1.6rem; }
+                body.song-open .song-detail { margin-top: 6px; }
+                body.song-open .song-detail .chords { font-size: 1.25rem; line-height: 1.9; padding: 22px; }
+                @media (max-width:600px) {
+                    body.song-open .song-detail .chords { font-size: 1.35rem; padding: 18px; }
+                }
+
         /* Mobile optimizations */
         @media (max-width: 600px) {
             body { padding: 12px; }
@@ -230,9 +240,9 @@
             background: #5568d3;
         }
 
-        /* Control buttons (visible by default) */
+        /* Control buttons: hidden by default, show when active (song view) */
         .control-button {
-            display: inline-block;
+            display: none;
             margin-bottom: 20px;
             padding: 12px 20px;
             background: #667eea;
@@ -243,6 +253,10 @@
             font-size: 1rem;
             transition: background 0.3s;
             margin-left: 8px;
+        }
+
+        .control-button.active {
+            display: inline-block;
         }
 
         .control-button:hover {
@@ -421,7 +435,8 @@ Chorus:
                     document.getElementById('listView').style.display = 'none';
                     document.getElementById('detailView').classList.add('active');
                     document.getElementById('backButton').classList.add('active');
-
+                    // Add class so header/search are hidden and lyrics are emphasized
+                    document.body.classList.add('song-open');
                     // Activate/hide toggle buttons
                     document.getElementById('toggleChords').classList.add('active');
                     const onlyBtn = document.getElementById('onlyChordsBtn');
@@ -471,12 +486,22 @@ Chorus:
 
 
             showList() {
-                this.currentSong = null;
+                    this.currentSong = null;
                 document.getElementById('listView').style.display = 'block';
                 document.getElementById('detailView').classList.remove('active');
                 document.getElementById('backButton').classList.remove('active');
-                document.getElementById('searchInput').value = '';
-                this.render();
+                // Remove focused class so header/search reappear and normal layout returns
+                document.body.classList.remove('song-open');
+                    // Hide chord control buttons when returning to list
+                    const toggleBtn = document.getElementById('toggleChords');
+                    if (toggleBtn) { toggleBtn.classList.remove('active'); toggleBtn.textContent = 'Show chords'; }
+                    const onlyBtn = document.getElementById('onlyChordsBtn');
+                    if (onlyBtn) { onlyBtn.classList.remove('active'); onlyBtn.textContent = 'Chords only'; }
+                    // Reset flags
+                    this.showOnlyChords = false;
+                    this.showChordSymbols = false;
+                    document.getElementById('searchInput').value = '';
+                    this.render();
             },
 
             renderList(songs = this.songs) {
