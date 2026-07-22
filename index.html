@@ -413,12 +413,16 @@
             init() {
                 this.loadSongs();
                 this.render();
-                
+                // Create a debounced fit function to avoid layout thrash on resize
+                this.debouncedFit = this.debounce(() => this.fitLyricsFont(), 150);
+                window.addEventListener('resize', () => { this.debouncedFit(); });
+
                 // Enter key support
                 document.getElementById('searchInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') this.search();
                 });
             },
+
 
             loadSongs() {
                 // Try to load a manifest from songs/index.json; fall back to localStorage or demo data
@@ -678,6 +682,8 @@ Chorus:
                     // lyrics
                     if (this.currentSong) {
                         document.getElementById('songChords').textContent = this.currentSong.chords || 'No content';
+                        // After setting lyrics, fit font to avoid horizontal scroll
+                        setTimeout(() => this.fitLyricsFont(), 20);
                     }
                     if (btnLyrics) btnLyrics.classList.add('active');
                 }
@@ -725,6 +731,60 @@ Chorus:
                 // Trim trailing whitespace on lines and overall
                 t = t.split('\n').map(l => l.replace(/\s+$/,'' )).join('\n');
                 return t.trim();
+            },
+
+            // Fit lyrics font to avoid horizontal scrolling: scale down until longest line fits container
+            fitLyricsFont() {
+                try {
+                    if (!this.currentSong) return;
+                    // Only when in lyrics view
+                    if (this.showOnlyChords || this.showChordSymbols) return;
+                    const chordsDiv = document.getElementById('songChords');
+                    if (!chordsDiv) return;
+                    const text = this.currentSong.chords || '';
+                    if (!text) return;
+
+                    const containerWidth = chordsDiv.clientWidth - 12; // allow small padding
+
+                    // Prepare canvas for accurate measurement
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const computedStyle = window.getComputedStyle(chordsDiv);
+                    const family = computedStyle.fontFamily || "'Courier New', monospace";
+                    let fontSizePx = parseFloat(computedStyle.fontSize) || 16;
+                    ctx.font = `${fontSizePx}px ${family}`;
+
+                    const lines = text.split('\n');
+                    let maxWidth = 0;
+                    for (let line of lines) {
+                        const w = ctx.measureText(line).width;
+                        if (w > maxWidth) maxWidth = w;
+                    }
+
+                    if (maxWidth <= containerWidth) {
+                        // restore default if previously modified
+                        chordsDiv.style.fontSize = '';
+                        return;
+                    }
+
+                    // compute new font size proportionally, with minimum cap
+                    const minFont = 10; // px
+                    let newSize = Math.floor(fontSizePx * containerWidth / maxWidth);
+                    if (newSize < minFont) newSize = minFont;
+                    chordsDiv.style.fontSize = newSize + 'px';
+                } catch (e) {
+                    // fail silently
+                    console.warn('fitLyricsFont error', e);
+                }
+            },
+
+            debounce(func, wait) {
+                let timeout = null;
+                return function(...args) {
+                    const later = () => { timeout = null; func.apply(this, args); };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
             },
 
             escapeHtml(text) {
