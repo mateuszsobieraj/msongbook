@@ -266,14 +266,14 @@
         .back-button {
             /* Back button hidden until a song is open */
             display: none;
-            margin-bottom: 20px;
-            padding: 12px 20px;
+            margin: 0;
+            padding: 8px 12px;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: background 0.3s;
         }
 
@@ -285,32 +285,43 @@
             background: #5568d3;
         }
 
-        /* Control buttons: hidden by default, show when active (song view) */
+        /* Control buttons: hidden by default, but show when a song is open */
         .control-button {
             display: none;
-            margin-bottom: 20px;
-            padding: 12px 20px;
+            margin: 0 0 0 6px;
+            padding: 8px 10px;
             background: #667eea;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             transition: background 0.3s;
-            margin-left: 8px;
         }
 
+        /* Show all view buttons when a song is open; keep active class for styling only */
+        body.song-open .control-button { display: inline-block; }
+
         .control-button.active {
-            display: inline-block;
+            /* active styling (keeps same layout) */
+            background: #4a5adf;
         }
+
+        /* Hide Lyrics button on main/list view */
+        body:not(.song-open) #btnLyrics { display: none !important; }
 
         .control-button:hover {
             background: #5568d3;
         }
 
-        /* Top controls row (back + view buttons) */
-        .top-controls { display:flex; align-items:center; gap:8px; margin-bottom: 12px; flex-wrap:nowrap; }
-        @media (max-width:600px) { .top-controls { gap:6px; } .back-button { padding: 8px 12px; } .control-button { padding: 8px 10px; font-size: 0.95rem; } }
+        /* Top controls row (back + view buttons) - compact in song view */
+        .top-controls { display:flex; align-items:center; gap:6px; margin-bottom: 6px; padding: 2px 0; flex-wrap:nowrap; }
+        .top-controls .song-controls { margin-left: auto; display:flex; gap:6px; }
+        @media (max-width:600px) { .top-controls { gap:6px; } .back-button { padding: 6px 8px; } .control-button { padding: 6px 8px; font-size: 0.9rem; } }
+
+        /* Reduce vertical footprint of song detail area */
+        body.song-open .song-detail { padding: 6px 6px 12px 6px; }
+        body.song-open .song-detail .chords { font-size: 1.05rem; line-height: 1.4; padding: 8px; }
 
         .no-results {
             text-align: center;
@@ -356,14 +367,7 @@
 
         <div class="controls"></div>
 
-        <div class="top-controls">
-            <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
-            <div class="song-controls">
-                <button class="control-button" id="btnLyrics" onclick="app.setViewMode('lyrics')">Lyrics</button>
-                <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full</button>
-                <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords</button>
-            </div>
-        </div>
+
 
         <div id="listView">
             <div id="songList" class="song-list"></div>
@@ -377,6 +381,13 @@
         </div>
 
         <div id="detailView" class="song-detail">
+            <div class="top-controls">
+                <button class="back-button" id="backButton" onclick="app.showList()">←</button>
+                <div class="song-controls">
+                    <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full</button>
+                    <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords</button>
+                </div>
+            </div>
             <h2 id="songTitle"></h2>
             <p class="artist" id="songArtist"></p>
             <div class="chords" id="songChords"></div>
@@ -491,6 +502,8 @@ Chorus:
                     document.getElementById('backButton').classList.add('active');
                     // Add class so header/search are hidden and lyrics are emphasized
                     document.body.classList.add('song-open');
+                    // Ensure view buttons are visible (some environments may override CSS)
+                    document.querySelectorAll('.control-button').forEach(b => b.style.display = 'inline-block');
                     // Activate toggle buttons (show in song view)
                     // Activate legacy buttons if present
                     const toggleBtn = document.getElementById('toggleChords');
@@ -549,6 +562,8 @@ Chorus:
                 document.getElementById('backButton').classList.remove('active');
                 // Remove focused class so header/search reappear and normal layout returns
                 document.body.classList.remove('song-open');
+                    // Hide view buttons explicitly (clear inline styles)
+                    document.querySelectorAll('.control-button').forEach(b => b.style.display = 'none');
                     // Also remove only-chords body class
                     document.body.classList.remove('only-chords');
                     // Hide chord control buttons when returning to list
