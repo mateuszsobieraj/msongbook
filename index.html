@@ -86,6 +86,11 @@
         .line { margin-bottom: 6px; }
         .song-detail .chords { white-space: normal; }
 
+        /* Chords-only view styling */
+        .chords-only-line { font-family: 'Courier New', monospace; color: #111; font-weight:700; padding: 6px 0; }
+        .chords-only-line.empty { height: 12px; }
+        @media (max-width:600px) { .chords-only-line { font-size: 1.05rem; } }
+
         .search-box input:focus {
             outline: none;
             border-color: #667eea;
@@ -270,6 +275,7 @@
 
         <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
         <button class="back-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
+        <button class="back-button" id="onlyChordsBtn" onclick="app.toggleOnlyChords()">Chords only</button>
 
         <div id="listView">
             <div id="songList" class="song-list"></div>
@@ -294,6 +300,7 @@
             songs: [],
             currentSong: null,
             showChordSymbols: false,
+            showOnlyChords: false,
 
             init() {
                 this.loadSongs();
@@ -383,14 +390,29 @@ Chorus:
                 const display = (textToShow) => {
                     document.getElementById('songTitle').textContent = this.currentSong.title;
                     document.getElementById('songArtist').textContent = this.currentSong.artist;
-                    document.getElementById('songChords').textContent = textToShow;
+
+                    // If user requested chords-only view, render chords-only; otherwise show full or parsed text
+                    if (this.showOnlyChords && this.currentSong && this.currentSong.rawChords) {
+                        document.getElementById('songChords').innerHTML = this.renderChordsOnly(this.currentSong.rawChords);
+                    } else {
+                        document.getElementById('songChords').textContent = textToShow;
+                    }
 
                     document.getElementById('listView').style.display = 'none';
                     document.getElementById('detailView').classList.add('active');
                     document.getElementById('backButton').classList.add('active');
+
+                    // Activate/hide toggle buttons
                     document.getElementById('toggleChords').classList.add('active');
-                    // Update toggle button label
-                    document.getElementById('toggleChords').textContent = this.showChordSymbols ? 'Hide chords' : 'Show chords';
+                    const onlyBtn = document.getElementById('onlyChordsBtn');
+                    if (onlyBtn) {
+                        onlyBtn.classList.toggle('active', this.showOnlyChords);
+                        onlyBtn.textContent = this.showOnlyChords ? 'Hide chords-only' : 'Chords only';
+                    }
+
+                    // Update toggle button label (chords inline/raw)
+                    const toggleBtn = document.getElementById('toggleChords');
+                    if (toggleBtn) toggleBtn.textContent = this.showChordSymbols ? 'Hide chords' : 'Show chords';
                 };
 
                 const chooseAndDisplay = () => {
@@ -473,11 +495,53 @@ Chorus:
             toggleChords() {
                 this.showChordSymbols = !this.showChordSymbols;
                 const btn = document.getElementById('toggleChords');
-                if (btn) btn.textContent = this.showChordSymbols ? 'Ukryj akordy' : 'Pokaż akordy';
+                if (btn) btn.textContent = this.showChordSymbols ? 'Hide chords' : 'Show chords';
+
+                // If chords-only mode is active, keep it (toggle affects raw vs parsed when not chords-only)
                 if (this.currentSong) {
-                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'No content');
-                    document.getElementById('songChords').textContent = textToShow;
+                    if (this.showOnlyChords) {
+                        // re-render chords-only from raw (raw preferred)
+                        if (this.currentSong.rawChords) {
+                            document.getElementById('songChords').innerHTML = this.renderChordsOnly(this.currentSong.rawChords);
+                        }
+                    } else {
+                        const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'No content');
+                        document.getElementById('songChords').textContent = textToShow;
+                    }
                 }
+            },
+
+            toggleOnlyChords() {
+                this.showOnlyChords = !this.showOnlyChords;
+                const btn = document.getElementById('onlyChordsBtn');
+                if (btn) btn.textContent = this.showOnlyChords ? 'Hide chords-only' : 'Chords only';
+
+                if (this.currentSong) {
+                    if (this.showOnlyChords && this.currentSong.rawChords) {
+                        document.getElementById('songChords').innerHTML = this.renderChordsOnly(this.currentSong.rawChords);
+                    } else {
+                        // revert to normal display (respect showChordSymbols)
+                        const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'No content');
+                        document.getElementById('songChords').textContent = textToShow;
+                    }
+                }
+            },
+
+            renderChordsOnly(rawText) {
+                if (!rawText) return '';
+                // For each line, extract chord tokens [C], [G7] and join them with spaces preserving line order
+                const lines = rawText.replace(/\r/g,'').split('\n');
+                const out = lines.map(line => {
+                    const matches = [];
+                    let m;
+                    const re = /\[([^\]]+)\]/g;
+                    while ((m = re.exec(line)) !== null) {
+                        matches.push(m[1].trim());
+                    }
+                    return matches.join(' ');
+                });
+                // Render only non-empty chord lines (but keep empty lines for spacing)
+                return out.map(l => l ? `<div class="chords-only-line">${this.escapeHtml(l)}</div>` : '<div class="chords-only-line empty"></div>').join('');
             },
 
             parseChordPro(text) {
