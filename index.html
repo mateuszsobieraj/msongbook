@@ -386,6 +386,7 @@
             <div class="top-controls">
                 <button class="back-button" id="backButton" onclick="app.showList()">←</button>
                 <div class="song-controls">
+                    <button class="control-button" id="btnLyrics" onclick="app.setViewMode('lyrics')">Lyrics</button>
                     <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full view</button>
                     <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords only</button>
                 </div>
@@ -694,9 +695,18 @@ Chorus:
                     }
                     return matches.join(' ');
                 });
-                // Render only non-empty chord lines (but keep empty lines for spacing)
-                return out.map(l => l ? `<div class="chords-only-line">${this.escapeHtml(l)}</div>` : '<div class="chords-only-line empty"></div>').join('');
+                // Strip leading empty chord lines so the chords-only view starts at the first chord
+                let firstNonEmpty = 0;
+                while (firstNonEmpty < out.length && out[firstNonEmpty].trim() === '') firstNonEmpty++;
+                const trimmed = out.slice(firstNonEmpty);
+                // If everything was empty, keep a single empty line
+                if (trimmed.length === 0) {
+                    return '<div class="chords-only-line empty"></div>';
+                }
+                // Render non-empty chord lines; keep internal empty lines for spacing
+                return trimmed.map(l => l ? `<div class="chords-only-line">${this.escapeHtml(l)}</div>` : '<div class="chords-only-line empty"></div>').join('');
             },
+
 
             parseChordPro(text) {
                 if (!text) return '';
