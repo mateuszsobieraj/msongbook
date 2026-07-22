@@ -236,15 +236,19 @@
                 }
 
                 /* Focused/song-open view: hide search and emphasize lyrics */
+                body.song-open { padding: 6px 6px 12px 6px; }
+                body.song-open .container { max-width: 100%; margin: 0; padding: 0 6px; }
                 body.song-open .header-search { display: none; }
-                body.song-open header { padding: 8px 0; }
+                /* Reduce header spacing when a song is open */
+                body.song-open header { padding: 6px 0; margin-bottom: 6px; }
                 /* Hide brand (logo + title) in song view to maximize space for lyrics */
                 body.song-open .brand-left { display: none; }
-                body.song-open header h1 { font-size: 1.6rem; }
-                body.song-open .song-detail { margin-top: 6px; }
-                body.song-open .song-detail .chords { font-size: 1.25rem; line-height: 1.9; padding: 22px; }
+                body.song-open header h1 { font-size: 1.4rem; }
+                body.song-open .song-detail { margin-top: 4px; padding: 6px; box-shadow: none; border-radius: 6px; }
+                /* Thin the decorative left border inside song detail to minimize colored area */
+                body.song-open .song-detail .chords { font-size: 1.05rem; line-height: 1.45; padding: 8px; border-left: 2px solid rgba(102,122,234,0.35); }
                 @media (max-width:600px) {
-                    body.song-open .song-detail .chords { font-size: 1.35rem; padding: 18px; }
+                    body.song-open .song-detail .chords { font-size: 1.0rem; padding: 6px; }
                 }
 
         /* Mobile optimizations */
