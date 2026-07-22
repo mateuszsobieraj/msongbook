@@ -437,17 +437,17 @@ Chorus:
                     document.getElementById('backButton').classList.add('active');
                     // Add class so header/search are hidden and lyrics are emphasized
                     document.body.classList.add('song-open');
-                    // Activate/hide toggle buttons
-                    document.getElementById('toggleChords').classList.add('active');
+                    // Activate toggle buttons (show in song view)
+                    const toggleBtn = document.getElementById('toggleChords');
+                    if (toggleBtn) {
+                        toggleBtn.classList.add('active');
+                        toggleBtn.textContent = this.showChordSymbols ? 'Hide chords' : 'Show chords';
+                    }
                     const onlyBtn = document.getElementById('onlyChordsBtn');
                     if (onlyBtn) {
-                        onlyBtn.classList.toggle('active', this.showOnlyChords);
+                        onlyBtn.classList.add('active');
                         onlyBtn.textContent = this.showOnlyChords ? 'Hide chords-only' : 'Chords only';
                     }
-
-                    // Update toggle button label (chords inline/raw)
-                    const toggleBtn = document.getElementById('toggleChords');
-                    if (toggleBtn) toggleBtn.textContent = this.showChordSymbols ? 'Hide chords' : 'Show chords';
                 };
 
                 const chooseAndDisplay = () => {
