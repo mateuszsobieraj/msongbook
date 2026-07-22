@@ -222,18 +222,20 @@
 
         .song-detail .chords {
             background: #fefefe;
-                    padding: 14px 12px;
-            border-radius: 8px;
+            padding: 6px 6px;
+            border-radius: 6px;
             font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-                    line-height: 1.45;
+            /* Do not force line wrapping; allow horizontal scroll if necessary */
+            white-space: pre;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            line-height: 1.45;
             color: #111;
-            border-left: 4px solid #667eea;
-                    font-size: 1rem;
-                    max-width: 100%;
-                    overflow-wrap: anywhere;
-                }
+            border-left: 2px solid rgba(102,122,234,0.35);
+            font-size: 1rem;
+            width: 100%;
+            max-width: none;
+        }
 
                 /* Focused/song-open view: hide search and emphasize lyrics */
                 body.song-open { padding: 6px 6px 12px 6px; }
