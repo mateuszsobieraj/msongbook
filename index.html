@@ -394,7 +394,7 @@
                 <div class="song-controls">
                     <button class="control-button" id="btnLyrics" onclick="app.setViewMode('lyrics')">Lyrics</button>
                     <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full view</button>
-                    <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords only</button>
+                    <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords</button>
                 </div>
             </div>
             <h2 id="songTitle"></h2>
@@ -527,7 +527,7 @@ Chorus:
                     const onlyBtn = document.getElementById('onlyChordsBtn');
                     if (onlyBtn) {
                         onlyBtn.classList.add('active');
-                        onlyBtn.textContent = this.showOnlyChords ? 'Hide chords-only' : 'Chords only';
+                        onlyBtn.textContent = this.showOnlyChords ? 'Hide chords' : 'Chords';
                     }
                     // Default view mode: lyrics only
                     if (typeof this.setViewMode === 'function') this.setViewMode('lyrics');
@@ -583,7 +583,7 @@ Chorus:
                     const toggleBtn = document.getElementById('toggleChords');
                     if (toggleBtn) { toggleBtn.classList.remove('active'); toggleBtn.textContent = 'Show chords'; }
                     const onlyBtn = document.getElementById('onlyChordsBtn');
-                    if (onlyBtn) { onlyBtn.classList.remove('active'); onlyBtn.textContent = 'Chords only'; }
+                    if (onlyBtn) { onlyBtn.classList.remove('active'); onlyBtn.textContent = 'Chords'; }
                     // Reset flags
                     this.showOnlyChords = false;
                     this.showChordSymbols = false;
