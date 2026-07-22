@@ -49,8 +49,10 @@
         .logo { width:40px; height:40px; }
         /* header search styling */
         .header-search { display:flex; align-items:center; gap:8px; }
-                .header-search input { width: 260px; max-width: 40vw; padding:8px 10px; border-radius:18px; }
-                @media (max-width:600px) { .logo { width:34px; height:34px; } .header-search input { width:60px; } .header-search input:focus { width:180px; } }
+                .header-search input { width: 260px; max-width: 40vw; padding:8px 10px; border-radius:18px; transition: width 0.25s ease; }
+                /* Wider search on main/list view (when not viewing a song) */
+                body:not(.song-open) .header-search input { width: 480px; max-width: 70vw; }
+                @media (max-width:600px) { .logo { width:34px; height:34px; } .header-search input { width:60px; } .header-search input:focus { width:180px; } body:not(.song-open) .header-search input { width: calc(100% - 100px); max-width: calc(100% - 100px); } }
 
 
         .controls {
@@ -60,6 +62,9 @@
             margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
+
+        /* Hide the white controls bar when viewing a song to keep lyrics prominent */
+        body.song-open .controls { display: none; }
 
         .search-box {
             display: flex;
