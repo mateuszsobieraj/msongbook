@@ -76,15 +76,17 @@
 
 
         .controls {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
+                    /* Hidden by default — reserved for future controls */
+                    display: none;
+                    background: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                }
 
-        /* Hide the white controls bar when viewing a song to keep lyrics prominent */
-        body.song-open .controls { display: none; }
+                /* Hide the white controls bar when viewing a song to keep lyrics prominent */
+                body.song-open .controls { display: none; }
 
         .search-box {
             display: flex;
