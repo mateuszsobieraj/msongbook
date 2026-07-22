@@ -43,9 +43,15 @@
             opacity: 0.9;
         }
 
-        .brand { display:flex; align-items:center; justify-content:center; gap:10px; }
+        .brand { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .brand-left { display:flex; align-items:center; gap:10px; }
+        .brand-right { display:flex; align-items:center; }
         .logo { width:40px; height:40px; }
-        @media (max-width:600px) { .logo { width:34px; height:34px; } }
+        /* header search styling */
+        .header-search { display:flex; align-items:center; gap:8px; }
+        .header-search input { width: 160px; padding:8px 10px; border-radius:18px; }
+        @media (max-width:600px) { .logo { width:34px; height:34px; } .header-search input { width:40px; } .header-search input:focus { width:140px; } }
+
 
         .controls {
             background: white;
@@ -247,22 +253,20 @@
     <div class="container">
         <header>
             <div class="brand">
-                <img src="assets/banjo.svg" alt="banjo" class="logo">
-                <h1>mSongbook</h1>
+                <div class="brand-left">
+                    <img src="assets/banjo.svg" alt="banjo" class="logo">
+                    <h1>mSongbook</h1>
+                </div>
+                <div class="brand-right">
+                    <div class="search-box header-search">
+                        <input type="text" id="searchInput" placeholder="Search by title or artist..." autocomplete="off">
+                        <button onclick="app.search()">Search</button>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <div class="controls">
-            <div class="search-box">
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    placeholder="Search by title or artist..."
-                    autocomplete="off"
-                >
-                <button onclick="app.search()">Search</button>
-            </div>
-        </div>
+        <div class="controls"></div>
 
         <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
         <button class="back-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
