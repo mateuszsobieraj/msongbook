@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mSongbook - Twój Śpiewnik</title>
+    <link rel="icon" href="assets/banjo.svg" type="image/svg+xml">
     <style>
         * {
             margin: 0;
@@ -13,7 +14,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #7b1323 0%, #4b0b0f 100%);
             min-height: 100vh;
             padding: 20px;
             color: #333;
@@ -42,6 +43,10 @@
             opacity: 0.9;
         }
 
+        .brand { display:flex; align-items:center; justify-content:center; gap:10px; }
+        .logo { width:40px; height:40px; }
+        @media (max-width:600px) { .logo { width:34px; height:34px; } }
+
         .controls {
             background: white;
             padding: 20px;
@@ -63,12 +68,17 @@
             border: 2px solid #ddd;
             border-radius: 20px;
             font-size: 0.95rem;
-            transition: border-color 0.3s;
+            transition: width 0.25s ease, border-color 0.3s;
         }
         .search-box button {
             padding: 10px 14px;
             border-radius: 20px;
             font-size: 0.95rem;
+        }
+        /* Mobile: collapsed search input that expands on focus */
+        @media (max-width: 600px) {
+            .search-box input { width: 40px; padding: 10px; }
+            .search-box input:focus { width: calc(100% - 80px); }
         }
         .segment { display: inline-block; vertical-align: top; white-space: pre; }
         .segment .chord { display: block; text-align: left; font-weight: 700; font-family: 'Courier New', monospace; color: #2b2b2b; }
@@ -242,7 +252,10 @@
 <body>
     <div class="container">
         <header>
-            <h1>🎵 mSongbook</h1>
+            <div class="brand">
+                <img src="assets/banjo.svg" alt="banjo" class="logo">
+                <h1>mSongbook</h1>
+            </div>
         </header>
 
         <div class="controls">
