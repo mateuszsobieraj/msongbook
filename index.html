@@ -209,6 +209,7 @@
         }
 
         .back-button {
+            /* Back button hidden until a song is open */
             display: none;
             margin-bottom: 20px;
             padding: 12px 20px;
@@ -226,6 +227,25 @@
         }
 
         .back-button:hover {
+            background: #5568d3;
+        }
+
+        /* Control buttons (visible by default) */
+        .control-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-left: 8px;
+        }
+
+        .control-button:hover {
             background: #5568d3;
         }
 
@@ -274,8 +294,8 @@
         <div class="controls"></div>
 
         <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
-        <button class="back-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
-        <button class="back-button" id="onlyChordsBtn" onclick="app.toggleOnlyChords()">Chords only</button>
+        <button class="control-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
+        <button class="control-button" id="onlyChordsBtn" onclick="app.toggleOnlyChords()">Chords only</button>
 
         <div id="listView">
             <div id="songList" class="song-list"></div>
