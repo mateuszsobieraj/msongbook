@@ -221,16 +221,18 @@
 
         .song-detail .chords {
             background: #fefefe;
-            padding: 18px 16px;
+                    padding: 14px 12px;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             white-space: pre-wrap;
             word-wrap: break-word;
-            line-height: 1.7;
+                    line-height: 1.45;
             color: #111;
             border-left: 4px solid #667eea;
-            font-size: 1.05rem;
-        }
+                    font-size: 1rem;
+                    max-width: 100%;
+                    overflow-wrap: anywhere;
+                }
 
                 /* Focused/song-open view: hide search and emphasize lyrics */
                 body.song-open .header-search { display: none; }
@@ -246,13 +248,19 @@
 
         /* Mobile optimizations */
         @media (max-width: 600px) {
-            body { padding: 12px; }
+            body { padding: 10px; }
             .container { padding: 0 6px; }
-            header h1 { font-size: 1.8rem; }
-            .song-card h3 { font-size: 1.05rem; }
-            .song-detail { padding: 20px; }
-            .song-detail .chords { font-size: 1.15rem; line-height: 1.6; padding: 18px; }
-            .search-box input { padding: 12px; font-size: 1rem; }
+            header h1 { font-size: 1.6rem; }
+            .song-card h3 { font-size: 1.0rem; }
+            .song-detail { padding: 16px; }
+            /* Compact lyrics for mobile: smaller font, tighter line-height */
+            .song-detail .chords { font-size: 0.98rem; line-height: 1.35; padding: 12px; }
+            .search-box input { padding: 10px; font-size: 0.98rem; }
+
+            /* Ensure chords-only uses most of the viewport but still fits — center content */
+            body.song-open.only-chords .song-detail { display:flex; align-items:center; justify-content:center; padding:6px; height: calc(100vh - 80px); }
+            body.song-open.only-chords .song-detail .chords { border-left: none; background: transparent; padding: 0; }
+            body.song-open.only-chords .chords-only-line { font-size: 3.2rem; line-height: 1.0; padding: 10px 0; }
         }
 
         .back-button {
@@ -300,6 +308,10 @@
             background: #5568d3;
         }
 
+        /* Top controls row (back + view buttons) */
+        .top-controls { display:flex; align-items:center; gap:8px; margin-bottom: 12px; flex-wrap:nowrap; }
+        @media (max-width:600px) { .top-controls { gap:6px; } .back-button { padding: 8px 12px; } .control-button { padding: 8px 10px; font-size: 0.95rem; } }
+
         .no-results {
             text-align: center;
             padding: 40px;
@@ -338,19 +350,20 @@
                         <input type="text" id="searchInput" placeholder="Search by title or artist..." autocomplete="off">
                         <button onclick="app.search()">Search</button>
                     </div>
-                    <div class="song-controls">
-                        <button class="control-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
-                        <button class="control-button" id="onlyChordsBtn" onclick="app.toggleOnlyChords()">Chords only</button>
-                    </div>
                 </div>
             </div>
         </header>
 
         <div class="controls"></div>
 
-        <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
-        <button class="control-button" id="toggleChords" onclick="app.toggleChords()">Show chords</button>
-        <button class="control-button" id="onlyChordsBtn" onclick="app.toggleOnlyChords()">Chords only</button>
+        <div class="top-controls">
+            <button class="back-button" id="backButton" onclick="app.showList()">← Back to list</button>
+            <div class="song-controls">
+                <button class="control-button" id="btnLyrics" onclick="app.setViewMode('lyrics')">Lyrics</button>
+                <button class="control-button" id="btnFull" onclick="app.setViewMode('full')">Full</button>
+                <button class="control-button" id="btnChords" onclick="app.setViewMode('chords')">Chords</button>
+            </div>
+        </div>
 
         <div id="listView">
             <div id="songList" class="song-list"></div>
@@ -479,6 +492,7 @@ Chorus:
                     // Add class so header/search are hidden and lyrics are emphasized
                     document.body.classList.add('song-open');
                     // Activate toggle buttons (show in song view)
+                    // Activate legacy buttons if present
                     const toggleBtn = document.getElementById('toggleChords');
                     if (toggleBtn) {
                         toggleBtn.classList.add('active');
@@ -489,6 +503,8 @@ Chorus:
                         onlyBtn.classList.add('active');
                         onlyBtn.textContent = this.showOnlyChords ? 'Hide chords-only' : 'Chords only';
                     }
+                    // Default view mode: lyrics only
+                    if (typeof this.setViewMode === 'function') this.setViewMode('lyrics');
                 };
 
                 const chooseAndDisplay = () => {
@@ -599,26 +615,54 @@ Chorus:
                 }
             },
 
+            // Toggle legacy only-chords button behavior (kept for compatibility)
             toggleOnlyChords() {
-                    this.showOnlyChords = !this.showOnlyChords;
-                const btn = document.getElementById('onlyChordsBtn');
-                    if (btn) {
-                        btn.textContent = this.showOnlyChords ? 'Hide chords-only' : 'Chords only';
-                        btn.classList.toggle('active', this.showOnlyChords);
-                    }
-                    // Add/remove body class for CSS targeting
-                    document.body.classList.toggle('only-chords', this.showOnlyChords);
-
-                    if (this.currentSong) {
-                        if (this.showOnlyChords && this.currentSong.rawChords) {
-                            document.getElementById('songChords').innerHTML = this.renderChordsOnly(this.currentSong.rawChords);
-                        } else {
-                            // revert to normal display (respect showChordSymbols)
-                            const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'No content');
-                            document.getElementById('songChords').textContent = textToShow;
-                        }
-                    }
+                // switch to chords mode or return to lyrics
+                this.setViewMode(this.showOnlyChords ? 'lyrics' : 'chords');
             },
+
+            // Set view mode: 'lyrics' (default), 'full' (raw ChordPro), 'chords' (chords-only)
+            setViewMode(mode) {
+                const btnLyrics = document.getElementById('btnLyrics');
+                const btnFull = document.getElementById('btnFull');
+                const btnChords = document.getElementById('btnChords');
+
+                // clear state
+                this.showOnlyChords = false;
+                this.showChordSymbols = false;
+                document.body.classList.remove('only-chords');
+                if (btnLyrics) btnLyrics.classList.remove('active');
+                if (btnFull) btnFull.classList.remove('active');
+                if (btnChords) btnChords.classList.remove('active');
+
+                if (mode === 'full') {
+                    // raw ChordPro
+                    this.showChordSymbols = true;
+                    if (this.currentSong && this.currentSong.rawChords) {
+                        document.getElementById('songChords').textContent = this.currentSong.rawChords;
+                    }
+                    if (btnFull) btnFull.classList.add('active');
+                } else if (mode === 'chords') {
+                    // chords only
+                    this.showOnlyChords = true;
+                    document.body.classList.add('only-chords');
+                    if (this.currentSong && this.currentSong.rawChords) {
+                        document.getElementById('songChords').innerHTML = this.renderChordsOnly(this.currentSong.rawChords);
+                    }
+                    if (btnChords) btnChords.classList.add('active');
+                } else {
+                    // lyrics
+                    if (this.currentSong) {
+                        document.getElementById('songChords').textContent = this.currentSong.chords || 'No content';
+                    }
+                    if (btnLyrics) btnLyrics.classList.add('active');
+                }
+
+                // ensure control buttons visible in song view
+                const toggleBtn = document.getElementById('toggleChords'); if (toggleBtn) toggleBtn.classList.add('active');
+                const onlyBtn = document.getElementById('onlyChordsBtn'); if (onlyBtn) onlyBtn.classList.add('active');
+            },
+
 
             renderChordsOnly(rawText) {
                 if (!rawText) return '';
