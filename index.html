@@ -355,7 +355,8 @@ Chorus:
                 };
 
                 if (this.currentSong.chords) {
-                    display(this.currentSong.chords);
+                    // Parse stored chords to remove ChordPro tags before display
+                    display(this.parseChordPro(this.currentSong.chords));
                     return;
                 }
 
@@ -364,13 +365,15 @@ Chorus:
                         if (!res.ok) throw new Error('Failed to load');
                         return res.text();
                     }).then(text => {
-                        this.currentSong.chords = text;
-                        display(text);
+                        // Parse fetched ChordPro file and store parsed text
+                        const parsed = this.parseChordPro(text);
+                        this.currentSong.chords = parsed;
+                        display(parsed);
                     }).catch(() => {
                         display('Nie można załadować treści piosenki.');
                     });
                 } else {
-                    display(this.currentSong.chords || 'Brak treści');
+                    display(this.parseChordPro(this.currentSong.chords || 'Brak treści'));
                 }
             },
 
@@ -415,6 +418,19 @@ Chorus:
 
             render() {
                 this.renderList();
+            },
+
+            parseChordPro(text) {
+                if (!text) return '';
+                // Remove ChordPro directives in braces {meta: ...} and chords in brackets [C], [G7] etc.
+                let t = text.replace(/\{[^}]*\}/g, '');
+                t = t.replace(/\[[^\]]*\]/g, '');
+                // Remove stray multiple blank lines and normalize newlines
+                t = t.replace(/\r/g, '');
+                t = t.replace(/\n{3,}/g, '\n\n');
+                // Trim whitespace at line ends
+                t = t.split('\n').map(l => l.replace(/\s+$/,'' )).join('\n');
+                return t.trim();
             },
 
             escapeHtml(text) {
