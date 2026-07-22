@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mSongbook - Twój Śpiewnik</title>
+    <title>mSongbook - Your songbook</title>
     <link rel="icon" href="assets/banjo.svg" type="image/svg+xml">
     <style>
         * {
@@ -337,8 +337,8 @@
                         this.songs = [
                             {
                                 id: 1,
-                                title: 'Przykładowa piosenka',
-                                artist: 'Artysta 1',
+                                title: 'Sample song',
+                                artist: 'Artist 1',
                                 chords: `Intro: [D] [A] [D]
 
 [D]Pierwszy wers
@@ -351,8 +351,8 @@ Chorus:
                             },
                             {
                                 id: 2,
-                                title: 'Druga piosenka',
-                                artist: 'Artysta 2',
+                                title: 'Second song',
+                                artist: 'Artist 2',
                                 chords: `[Em]Wers [Am]pierwszy
 [D]Drugi [G]wers
 [C]Trzeci [B]wers
@@ -416,7 +416,7 @@ Chorus:
                 };
 
                 const chooseAndDisplay = () => {
-                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'Brak treści');
+                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'No content');
                     display(textToShow);
                 };
 
