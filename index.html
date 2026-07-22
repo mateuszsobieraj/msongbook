@@ -58,12 +58,23 @@
 
         .search-box input {
             flex: 1;
-            padding: 12px 15px;
+            max-width: 320px;
+            padding: 10px 12px;
             border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
+            border-radius: 20px;
+            font-size: 0.95rem;
             transition: border-color 0.3s;
         }
+        .search-box button {
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+        }
+        .segment { display: inline-block; vertical-align: top; white-space: pre; }
+        .segment .chord { display: block; text-align: left; font-weight: 700; font-family: 'Courier New', monospace; color: #2b2b2b; }
+        .segment .lyric { display: block; }
+        .line { margin-bottom: 6px; }
+        .song-detail .chords { white-space: normal; }
 
         .search-box input:focus {
             outline: none;
@@ -372,8 +383,9 @@ Chorus:
                 };
 
                 const chooseAndDisplay = () => {
-                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'Brak treści');
-                    display(textToShow);
+                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.rawChords || this.currentSong.chords || 'Brak treści');
+                    // Render either with chords above lyrics or without chords depending on toggle
+                    document.getElementById('songChords').innerHTML = this.renderChordProHtml(textToShow, this.showChordSymbols);
                 };
 
                 if (this.currentSong.chords && !this.currentSong.rawChords) {
@@ -396,6 +408,7 @@ Chorus:
                         // Store both raw and parsed forms
                         this.currentSong.rawChords = text;
                         this.currentSong.chords = this.parseChordPro(text);
+                        // Render accordingly
                         chooseAndDisplay();
                     }).catch(() => {
                         display('Nie można załadować treści piosenki.');
@@ -453,9 +466,31 @@ Chorus:
                 const btn = document.getElementById('toggleChords');
                 if (btn) btn.textContent = this.showChordSymbols ? 'Ukryj akordy' : 'Pokaż akordy';
                 if (this.currentSong) {
-                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.chords || 'Brak treści');
-                    document.getElementById('songChords').textContent = textToShow;
+                    const textToShow = (this.showChordSymbols && this.currentSong.rawChords) ? this.currentSong.rawChords : (this.currentSong.rawChords || this.currentSong.chords || 'Brak treści');
+                    document.getElementById('songChords').innerHTML = this.renderChordProHtml(textToShow, this.showChordSymbols);
                 }
+            },
+
+            renderChordProHtml(rawText, showChords) {
+                if (!rawText) return '';
+                // Escape HTML in text segments
+                const esc = (s) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                const lines = rawText.replace(/\r/g,'').split('\n');
+                const out = lines.map(line => {
+                    let html = '';
+                    const re = /(?:\[([^\]]+)\])?([^\[]*)/g;
+                    let m;
+                    while ((m = re.exec(line)) !== null) {
+                        const chord = m[1] ? esc(m[1]) : '';
+                        const lyric = m[2] ? esc(m[2]) : '';
+                        // keep spaces in lyric using &nbsp; when necessary; preserve original spacing by using pre styling on segments
+                        const chordHtml = `<span class="chord" style="display:${showChords? 'block':'none'}">${chord}</span>`;
+                        const lyricHtml = `<span class="lyric">${lyric || '&nbsp;'}</span>`;
+                        html += `<span class="segment">${chordHtml}${lyricHtml}</span>`;
+                    }
+                    return `<div class="line">${html}</div>`;
+                }).join('');
+                return out;
             },
 
             parseChordPro(text) {
