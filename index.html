@@ -53,6 +53,12 @@
                 /* Wider search on main/list view (when not viewing a song) */
                 body:not(.song-open) .header-search input { width: 480px; max-width: 70vw; }
 
+                /* Place search under title on main view and make it wider */
+                body:not(.song-open) .brand { flex-direction: column; align-items: center; gap: 10px; }
+                body:not(.song-open) .brand-right { order: 2; width: 100%; display: flex; justify-content: center; }
+                body:not(.song-open) .header-search { width: min(900px, 90%); max-width: 900px; }
+                body:not(.song-open) .header-search input { width: 100%; max-width: 900px; }
+
                 /* Song controls next to header search */
                 .song-controls { display:flex; gap:8px; align-items:center; }
 
