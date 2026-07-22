@@ -1,74 +1,14 @@
-﻿[
-    {
-        "title":  "if i needed you",
-        "filename":  "if_i_needed_you.chordpro",
-        "artist":  "",
-        "id":  1
-    },
-    {
-        "title":  "I fly away",
-        "filename":  "I_fly_away.chordpro",
-        "artist":  "",
-        "id":  2
-    },
-    {
-        "title":  "me and bobby mcgee",
-        "filename":  "me_and_bobby_mcgee.chordpro",
-        "artist":  "",
-        "id":  3
-    },
-    {
-        "title":  "rockytop",
-        "filename":  "rockytop.chordpro",
-        "artist":  "",
-        "id":  4
-    },
-    {
-        "title":  "sailing to philadelphia",
-        "filename":  "sailing_to_philadelphia.chordpro",
-        "artist":  "",
-        "id":  5
-    },
-    {
-        "title":  "shenandoah",
-        "filename":  "shenandoah.chordpro",
-        "artist":  "",
-        "id":  6
-    },
-    {
-        "title":  "take me home country roads",
-        "filename":  "take_me_home_country_roads.chordpro",
-        "artist":  "",
-        "id":  7
-    },
-    {
-        "title":  "these boots are made for walking",
-        "filename":  "these_boots_are_made_for_walking.chordpro",
-        "artist":  "",
-        "id":  8
-    },
-    {
-        "title":  "this land is your land",
-        "filename":  "this_land_is_your_land.chordpro",
-        "artist":  "",
-        "id":  9
-    },
-    {
-        "title":  "wade in the water",
-        "filename":  "wade_in_the_water.chordpro",
-        "artist":  "",
-        "id":  10
-    },
-    {
-        "title":  "wildwood",
-        "filename":  "wildwood.chordpro",
-        "artist":  "",
-        "id":  11
-    },
-    {
-        "title":  "woried man blues",
-        "filename":  "woried_man_blues.chordpro",
-        "artist":  "",
-        "id":  12
-    }
+[
+  { "id": 1, "filename": "if_i_needed_you.chordpro", "title": "If I Needed You", "artist": "" },
+  { "id": 2, "filename": "I_fly_away.chordpro", "title": "I Fly Away", "artist": "" },
+  { "id": 3, "filename": "me_and_bobby_mcgee.chordpro", "title": "Me and Bobby McGee", "artist": "" },
+  { "id": 4, "filename": "rockytop.chordpro", "title": "Rocky Top", "artist": "" },
+  { "id": 5, "filename": "sailing_to_philadelphia.chordpro", "title": "Sailing to Philadelphia", "artist": "" },
+  { "id": 6, "filename": "shenandoah.chordpro", "title": "Shenandoah", "artist": "" },
+  { "id": 7, "filename": "take_me_home_country_roads.chordpro", "title": "Take Me Home, Country Roads", "artist": "" },
+  { "id": 8, "filename": "these_boots_are_made_for_walking.chordpro", "title": "These Boots Are Made for Walking", "artist": "" },
+  { "id": 9, "filename": "this_land_is_your_land.chordpro", "title": "This Land Is Your Land", "artist": "" },
+  { "id": 10, "filename": "wade_in_the_water.chordpro", "title": "Wade in the Water", "artist": "" },
+  { "id": 11, "filename": "wildwood.chordpro", "title": "Wildwood", "artist": "" },
+  { "id": 12, "filename": "woried_man_blues.chordpro", "title": "Worried Man Blues", "artist": "" }
 ]

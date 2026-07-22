@@ -220,7 +220,6 @@
     <div class="container">
         <header>
             <h1>🎵 mSongbook</h1>
-            <p>Twój osobisty śpiewnik - szukaj i śpiewaj!</p>
         </header>
 
         <div class="controls">
@@ -271,18 +270,33 @@
             },
 
             loadSongs() {
-                // Songs will be loaded from localStorage or from data
-                const stored = localStorage.getItem('songs');
-                if (stored) {
-                    this.songs = JSON.parse(stored);
-                } else {
-                    // Demo songs
-                    this.songs = [
-                        {
-                            id: 1,
-                            title: 'Przykładowa piosenka',
-                            artist: 'Artysta 1',
-                            chords: `Intro: [D] [A] [D]
+                // Try to load a manifest from songs/index.json; fall back to localStorage or demo data
+                fetch('songs/index.json').then(res => {
+                    if (!res.ok) throw new Error('No manifest');
+                    return res.json();
+                }).then(list => {
+                    this.songs = list.map((s, idx) => ({
+                        id: s.id || idx + 1,
+                        filename: s.filename,
+                        title: s.title || s.filename.replace(/_/g, ' ').replace(/\.chordpro$/i, ''),
+                        artist: s.artist || ''
+                    }));
+                    // cache for offline use
+                    localStorage.setItem('songs', JSON.stringify(this.songs));
+                    this.render();
+                }).catch(() => {
+                    const stored = localStorage.getItem('songs');
+                    if (stored) {
+                        this.songs = JSON.parse(stored);
+                        this.render();
+                    } else {
+                        // Demo songs fallback
+                        this.songs = [
+                            {
+                                id: 1,
+                                title: 'Przykładowa piosenka',
+                                artist: 'Artysta 1',
+                                chords: `Intro: [D] [A] [D]
 
 [D]Pierwszy wers
 [A]Jakiś tekst
@@ -291,22 +305,24 @@
 Chorus:
 [G]Refren [D]jest super
 [A]Wszyscy [D]śpiewają`
-                        },
-                        {
-                            id: 2,
-                            title: 'Druga piosenka',
-                            artist: 'Artysta 2',
-                            chords: `[Em]Wers [Am]pierwszy
+                            },
+                            {
+                                id: 2,
+                                title: 'Druga piosenka',
+                                artist: 'Artysta 2',
+                                chords: `[Em]Wers [Am]pierwszy
 [D]Drugi [G]wers
 [C]Trzeci [B]wers
 
 Chorus:
 [Em]La la [Am]la
 [D]La la [G]la`
-                        }
-                    ];
-                }
+                            }
+                        ];
+                    }
+                });
             },
+
 
             search() {
                 const query = document.getElementById('searchInput').value.toLowerCase();
@@ -328,14 +344,36 @@ Chorus:
                 this.currentSong = this.songs.find(s => s.id === id);
                 if (!this.currentSong) return;
 
-                document.getElementById('songTitle').textContent = this.currentSong.title;
-                document.getElementById('songArtist').textContent = this.currentSong.artist;
-                document.getElementById('songChords').textContent = this.currentSong.chords;
+                const display = (chordsText) => {
+                    document.getElementById('songTitle').textContent = this.currentSong.title;
+                    document.getElementById('songArtist').textContent = this.currentSong.artist;
+                    document.getElementById('songChords').textContent = chordsText;
 
-                document.getElementById('listView').style.display = 'none';
-                document.getElementById('detailView').classList.add('active');
-                document.getElementById('backButton').classList.add('active');
+                    document.getElementById('listView').style.display = 'none';
+                    document.getElementById('detailView').classList.add('active');
+                    document.getElementById('backButton').classList.add('active');
+                };
+
+                if (this.currentSong.chords) {
+                    display(this.currentSong.chords);
+                    return;
+                }
+
+                if (this.currentSong.filename) {
+                    fetch('songs/' + this.currentSong.filename).then(res => {
+                        if (!res.ok) throw new Error('Failed to load');
+                        return res.text();
+                    }).then(text => {
+                        this.currentSong.chords = text;
+                        display(text);
+                    }).catch(() => {
+                        display('Nie można załadować treści piosenki.');
+                    });
+                } else {
+                    display(this.currentSong.chords || 'Brak treści');
+                }
             },
+
 
             showList() {
                 this.currentSong = null;
