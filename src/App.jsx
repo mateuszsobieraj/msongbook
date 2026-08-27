@@ -3,6 +3,7 @@ import SongList from './components/SongList.jsx';
 import SongDetail from './components/SongDetail.jsx';
 
 function App() {
+  const assetBase = import.meta.env.BASE_URL;
   const [songs, setSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
   const [query, setQuery] = useState('');
@@ -15,7 +16,7 @@ function App() {
     async function loadSongs() {
       setIsLoading(true);
       try {
-        const res = await fetch('/songs/index.json');
+        const res = await fetch(`${assetBase}songs/index.json`);
         if (!res.ok) throw new Error('No manifest');
         const list = await res.json();
         const mapped = list.map((s) => ({
@@ -42,7 +43,7 @@ function App() {
 
     async function loadContent() {
       try {
-        const res = await fetch(`/songs/${currentSong.filename}`);
+        const res = await fetch(`${assetBase}songs/${currentSong.filename}`);
         if (!res.ok) throw new Error('Failed to load song');
         const contentType = res.headers.get('content-type') || '';
         const text = await res.text();
@@ -86,7 +87,7 @@ function App() {
       <header>
         <div className="brand">
           <div className="brand-left" onClick={goHome} style={{cursor: 'pointer'}}>
-            <img src="/assets/banjo.svg" alt="banjo" className="logo" />
+            <img src={`${assetBase}assets/banjo.svg`} alt="banjo" className="logo" />
             <h1>MSongbook</h1>
           </div>
           {!currentSong && (
