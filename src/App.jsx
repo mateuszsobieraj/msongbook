@@ -8,6 +8,8 @@ function App() {
   const [currentSong, setCurrentSong] = useState(null);
   const [query, setQuery] = useState('');
   const [songContent, setSongContent] = useState(null);
+  const [isSongLoading, setIsSongLoading] = useState(false);
+  const [songError, setSongError] = useState('');
   const [viewMode, setViewMode] = useState('fullview');
   const [isLoading, setIsLoading] = useState(true);
 
@@ -22,7 +24,10 @@ function App() {
         const mapped = list.map((s) => ({
           filename: s.filename,
           title: s.title || (s.filename ? s.filename.replace(/[_-]/g, ' ').replace(/\.chordpro$/i, '') : 'Untitled'),
-          artist: s.artist || ''
+          artist: s.artist || '',
+          genres: Array.isArray(s.genres) ? s.genres : [],
+          tags: Array.isArray(s.tags) ? s.tags : [],
+          speed: s.speed || ''
         }));
         setSongs(mapped);
       } catch (err) {
@@ -38,12 +43,21 @@ function App() {
   useEffect(() => {
     if (!currentSong) {
       setSongContent(null);
+      setIsSongLoading(false);
+      setSongError('');
       return;
     }
 
+    const controller = new AbortController();
+
     async function loadContent() {
+      setIsSongLoading(true);
+      setSongError('');
+      setSongContent(null);
       try {
-        const res = await fetch(`${assetBase}songs/${currentSong.filename}`);
+        const res = await fetch(`${assetBase}songs/${currentSong.filename}`, {
+          signal: controller.signal
+        });
         if (!res.ok) throw new Error('Failed to load song');
         const contentType = res.headers.get('content-type') || '';
         const text = await res.text();
@@ -52,29 +66,48 @@ function App() {
         }
         setSongContent(text);
       } catch (err) {
+        if (err.name === 'AbortError') return;
         console.error('Error loading song', err);
+        setSongError('Could not load this song.');
         setSongContent(null);
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsSongLoading(false);
+        }
       }
     }
     loadContent();
+    return () => controller.abort();
+  }, [assetBase, currentSong]);
+
+  useEffect(() => {
+    document.body.classList.toggle('song-open', Boolean(currentSong));
+    return () => document.body.classList.remove('song-open');
   }, [currentSong]);
 
-  const filteredSongs = songs.filter(song =>
-    (song.title || '').toLowerCase().includes(query.toLowerCase()) ||
-    (song.artist || '').toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredSongs = songs.filter(song => {
+    const searchableText = [
+      song.title,
+      song.artist,
+      song.speed,
+      ...(song.genres || []),
+      ...(song.tags || [])
+    ].join(' ').toLowerCase();
+
+    return searchableText.includes(query.toLowerCase());
+  });
 
   const handleSongSelect = (song) => {
     setCurrentSong(song);
     setViewMode('fullview');
-    document.body.classList.add('song-open');
   };
 
   const handleBack = () => {
     setCurrentSong(null);
     setSongContent(null);
+    setSongError('');
+    setIsSongLoading(false);
     setViewMode('fullview');
-    document.body.classList.remove('song-open');
   };
 
   const goHome = () => {
@@ -86,10 +119,10 @@ function App() {
     <div className="app">
       <header>
         <div className="brand">
-          <div className="brand-left" onClick={goHome} style={{cursor: 'pointer'}}>
+          <button className="brand-left" type="button" onClick={goHome} aria-label="Go to song list">
             <img src={`${assetBase}assets/banjo.svg`} alt="banjo" className="logo" />
             <h1>MSongbook</h1>
-          </div>
+          </button>
           {!currentSong && (
             <div className="brand-right">
               <div className="search-box header-search">
@@ -117,9 +150,10 @@ function App() {
           <SongDetail 
             song={currentSong}
             content={songContent}
+            isLoading={isSongLoading}
+            error={songError}
             viewMode={viewMode}
             onSetViewMode={setViewMode}
-            onBack={handleBack}
           />
         )}
       </main>

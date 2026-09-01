@@ -13,6 +13,58 @@ export function parseChordPro(text) {
   return t.trim();
 }
 
+export function renderLyricsOnlyHtml(rawText) {
+  if (!rawText) return '';
+
+  const html = [];
+  let isInChorus = false;
+  let pendingChorusLabel = '';
+
+  const openChorus = () => {
+    if (isInChorus) return;
+    html.push('<div class="lyrics-chorus">');
+    pendingChorusLabel = '';
+    isInChorus = true;
+  };
+
+  const closeChorus = () => {
+    if (!isInChorus) return;
+    html.push('</div>');
+    isInChorus = false;
+  };
+
+  rawText.replace(/\r/g, '').split('\n').forEach((line) => {
+    const directive = line.trim().match(/^\{([^:}]+)(?::\s*([^}]*))?\}$/);
+
+    if (directive) {
+      const name = directive[1].trim().toLowerCase();
+      const value = (directive[2] || '').trim();
+
+      if (name === 'start_of_chorus' || name === 'soc') {
+        openChorus();
+      } else if (name === 'end_of_chorus' || name === 'eoc') {
+        closeChorus();
+      } else if ((name === 'comment' || name === 'c') && /^chorus\b/i.test(value)) {
+        pendingChorusLabel = value;
+      }
+      return;
+    }
+
+    const lyrics = line.replace(/\[[^\]]*\]/g, '').replace(/\s+$/g, '');
+
+    if (lyrics.trim() === '') {
+      html.push('<div class="lyrics-line empty"></div>');
+      return;
+    }
+
+    html.push(`<div class="lyrics-line">${escapeHtml(lyrics)}</div>`);
+  });
+
+  closeChorus();
+
+  return html.join('');
+}
+
 export function renderChordsOnly(rawText) {
   if (!rawText) return '';
   
@@ -60,7 +112,7 @@ export function renderChordSheetHtml(song) {
   if (!song) return '';
   try {
     const formatter = new ChordSheetJS.HtmlDivFormatter();
-    return formatter.format(song);
+    return sanitizeHtml(formatter.format(song));
   } catch (error) {
     console.error('render error:', error);
     return '';
@@ -78,4 +130,28 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function sanitizeHtml(html) {
+  if (typeof html !== 'string') return '';
+
+  const template = document.createElement('template');
+  template.innerHTML = html;
+
+  template.content.querySelectorAll('script, iframe, object, embed').forEach((node) => {
+    node.remove();
+  });
+
+  template.content.querySelectorAll('*').forEach((node) => {
+    [...node.attributes].forEach((attribute) => {
+      const name = attribute.name.toLowerCase();
+      const value = attribute.value.trim().toLowerCase();
+
+      if (name.startsWith('on') || value.startsWith('javascript:')) {
+        node.removeAttribute(attribute.name);
+      }
+    });
+  });
+
+  return template.innerHTML;
 }

@@ -40,6 +40,12 @@ header {
   display: flex;
   align-items: center;
   gap: 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
 }
 
 .logo {
@@ -334,31 +340,36 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
   justify-content: center;
 }
 
+.label-short {
+  display: none;
+}
+
 /* Song content */
 .song-content {
+  --song-readable-font-size: calc(1rem * var(--song-font-scale, 1));
   background: #f8f9fa;
   padding: 12px;
   border-radius: 8px;
   overflow-x: auto;
-  font-size: var(--font-size-base, 1rem);
-  line-height: 1.45;
+  font-size: var(--song-readable-font-size);
+  line-height: 1.35;
 }
 
 .song-content.mode-flex {
   font-family: inherit;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* chordsheetjs styles */
 .chordsheet {
-  font-size: var(--font-size-base, 1rem);
+  font-size: var(--song-readable-font-size);
   font-family: 'Courier New', monospace;
 }
 
 .chordsheet .row {
   display: flex;
   flex-wrap: nowrap;
-  align-items: flex-start;
+  align-items: flex-end;
   width: 100%;
 }
 
@@ -374,30 +385,66 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
   color: #d6336c;
   font-family: 'Courier New', monospace;
   font-size: 1.1em;
-  min-height: 1.45em;
-  margin-bottom: 0.2em;
+  min-height: 1.2em;
+  margin-bottom: 0.08em;
 }
 .chordsheet .lyrics {
   color: #212529;
 }
 .chordsheet .paragraph {
-  margin-bottom: 1.2em;
+  margin-bottom: 0.85em;
+}
+
+.chordsheet .paragraph.chorus {
+  background: #fff3bf;
+  border-left: 4px solid #d6336c;
+  border-radius: 6px;
+  margin: 0.25em 0 1em;
+  padding: 0.45em 0.65em;
+}
+
+.chordsheet .paragraph.chorus .lyrics {
+  font-weight: 650;
 }
 
 .chordpro-raw {
   font-family: 'Fira Code', 'Courier New', monospace;
   white-space: pre;
-  font-size: 0.95rem;
+  font-size: calc(0.95rem * var(--song-font-scale, 1));
   color: #495057;
   overflow-x: auto;
 }
 
 .lyrics-only {
   font-family: 'Segoe UI', sans-serif;
-  font-size: 1.15rem;
+  font-size: calc(1.15rem * var(--song-font-scale, 1));
   line-height: 1.8;
   color: #212529;
   white-space: pre-wrap;
+}
+
+.lyrics-line.empty {
+  min-height: 0.9em;
+}
+
+.lyrics-chorus {
+  background: #fff3bf;
+  border-left: 4px solid #d6336c;
+  border-radius: 6px;
+  color: #1f2933;
+  font-weight: 650;
+  margin: 0.35em 0 0.75em;
+  padding: 0.55em 0.75em;
+}
+
+.lyrics-section-label {
+  color: #a61e4d;
+  font-size: 0.8em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  margin-bottom: 0.35em;
+  text-transform: uppercase;
 }
 
 .chords-only {
@@ -513,6 +560,17 @@ body.song-open .song-detail.dark {
   color: #8b8b9e;
 }
 
+.song-detail.dark .chordsheet .paragraph.chorus,
+.song-detail.dark .lyrics-chorus {
+  background: #33243a;
+  border-left-color: #ff9eb5;
+  color: #f8fafc;
+}
+
+.song-detail.dark .lyrics-section-label {
+  color: #ffb3c4;
+}
+
 /* Lyrics-only */
 .song-detail.dark .lyrics-only {
   background: #16213e;
@@ -537,14 +595,19 @@ body.song-open .song-detail.dark {
 
 /* Mobile dark mode */
 @media (max-width: 600px) {
-  body.song-open { padding: 6px; }
+  body.song-open { padding: 4px; }
   .song-detail.dark { padding: 12px; }
 }
 
 /* Mobile song style */
 @media (max-width: 600px) {
+  body.song-open .app {
+    padding: 0;
+  }
+
   .song-detail {
-    padding: 16px;
+    border-radius: 8px;
+    padding: 10px;
   }
 
   .song-detail h2 {
@@ -555,33 +618,96 @@ body.song-open .song-detail.dark {
   }
 
   .top-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
   }
   
   .song-controls {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    flex: 1 1 auto;
+    gap: 3px;
+    min-width: 0;
+    width: auto;
   }
   
   .font-controls {
-    justify-content: center;
-    width: 100%;
+    flex: 0 0 auto;
+    gap: 3px;
+    justify-content: flex-end;
+    width: auto;
   }
 
   .control-button {
+    flex: 1 1 0;
+    min-width: 0;
     text-align: center;
-    padding: 10px;
+    padding: 8px 3px;
+    font-size: 0.76rem;
+  }
+
+  .font-button {
+    flex: 0 0 30px;
+    min-width: 30px;
+    padding: 8px 0;
+    font-size: 1rem;
+  }
+
+  .label-full {
+    display: none;
+  }
+
+  .label-short {
+    display: inline;
   }
   
   .song-content {
-    padding: 12px;
-    font-size: calc(var(--font-size-base) * 0.95);
+    --song-readable-font-size: calc(1.1rem * var(--song-font-scale, 1));
+    overflow-x: hidden;
+    padding: 10px;
   }
+
+  .song-content.mode-flex {
+    white-space: normal;
+  }
+
+  .chordsheet {
+    line-height: 1.35;
+  }
+
+  .chordsheet .row {
+    display: block;
+  }
+
+  .chordsheet .column {
+    display: inline-flex;
+    flex-shrink: 1;
+    min-width: 0;
+    vertical-align: bottom;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
+  .chordsheet .lyrics {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
   .chordsheet .chord {
-    margin-bottom: 0.35em;
+    min-height: 1.15em;
+    margin-bottom: 0.08em;
+  }
+
+  .chordsheet .paragraph.chorus,
+  .lyrics-chorus {
+    border-left-width: 3px;
+    margin: 0.25em 0 0.65em;
+    padding: 0.45em 0.55em;
+  }
+
+  .lyrics-only {
+    line-height: 1.55;
   }
 }

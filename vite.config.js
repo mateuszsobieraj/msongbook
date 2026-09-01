@@ -5,6 +5,15 @@ export default defineConfig({
   base: '/msongbook/',
   appType: 'mpa',
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          chordsheet: ['chordsheetjs']
+        }
+      }
+    }
+  },
   test: {
     environment: 'jsdom',
     globals: true,

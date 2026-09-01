@@ -15,7 +15,9 @@ When I saw that hearse come rolling
 For to carry my mother away.
 
 {c: Chorus}
-        Will the circle...
+{start_of_chorus}
+Will the circle...
+{end_of_chorus}
 
 {c: Verse}
 Lord, I told that undertaker,
@@ -24,7 +26,9 @@ For this body that you are hauling
 Lord, I hate to see her go.
 
 {c: Chorus}
-        Will the circle...
+{start_of_chorus}
+Will the circle...
+{end_of_chorus}
 {c: Verse}
 I followed close behind her
 Tried to hold up and be brave
@@ -32,11 +36,16 @@ But I could not hide my sorrow
 When they laid her in the grave.
 
 {c: Chorus}
-        Will the circle..{c: Verse}
+{start_of_chorus}
+Will the circle..
+{end_of_chorus}
+{c: Verse}
 I went home, my home was lonely
 Now my mother she was gone
 All my brothers, sisters crying
 What a home so sad and alone
 
 {c: Chorus x 2}
-        Will the circle...
+{start_of_chorus}
+Will the circle...
+{end_of_chorus}

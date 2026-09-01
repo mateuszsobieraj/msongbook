@@ -34,7 +34,9 @@ That’s why all the folks on Rocky Top
 Get their corn from a jar
 {end_of_verse}
 {c: Chorus}
-        Rocky Top you’ll always be...
+{start_of_chorus}
+Rocky Top you’ll always be...
+{end_of_chorus}
 
 {c: Solo 2x Verse + Chorus}
 {start_of_verse}
@@ -45,6 +47,8 @@ Can’t be simple again
 {end_of_verse}
 
 {c: Chorus}
-        Rocky Top you’ll always be...
+{start_of_chorus}
+Rocky Top you’ll always be...
+{end_of_chorus}
 
 

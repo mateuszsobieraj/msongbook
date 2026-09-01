@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { parseChordPro, renderChordsOnly, parseAndRenderChordPro, renderChordSheetHtml } from '../utils/chordpro.js';
+import { parseChordPro, renderChordsOnly, renderLyricsOnlyHtml, parseAndRenderChordPro, renderChordSheetHtml } from '../utils/chordpro.js';
 
-export default function SongDetail({ song, content, viewMode, onSetViewMode, onBack }) {
-  const isLoading = content === null;
+export default function SongDetail({ song, content, isLoading = content === null, error = '', viewMode, onSetViewMode }) {
   const [fontSizeScale, setFontSizeScale] = useState(1);
   const [transpose, setTranspose] = useState(0);
   const [capo, setCapo] = useState(0);
@@ -25,6 +24,7 @@ export default function SongDetail({ song, content, viewMode, onSetViewMode, onB
     let songObj = parseAndRenderChordPro(content);
     // Always compute clean lyrics (without chords) for the Lyrics view
     const cleanLyrics = parseChordPro(content);
+    const lyricsHtml = renderLyricsOnlyHtml(content);
     
     if (songObj) {
       // Apply transposition and capo for FullView mode
@@ -39,18 +39,19 @@ export default function SongDetail({ song, content, viewMode, onSetViewMode, onB
       return { 
         type: 'chordsheet', 
         html: renderChordSheetHtml(songObj),
-        lyrics: cleanLyrics
+        lyrics: cleanLyrics,
+        lyricsHtml
       };
     }
     return { 
       type: 'fallback', 
-      lyrics: cleanLyrics
+      lyrics: cleanLyrics,
+      lyricsHtml
     };
   }, [content, isLoading, viewMode, transpose, capo]);
 
-  // Style variable for dynamic font sizing
   const contentStyle = {
-    fontSize: `${fontSizeScale}rem`
+    '--song-font-scale': String(fontSizeScale)
   };
 
   const renderContent = () => {
@@ -58,23 +59,27 @@ export default function SongDetail({ song, content, viewMode, onSetViewMode, onB
       return <div className="empty-state">Loading song…</div>;
     }
 
+    if (error) {
+      return <div className="empty-state">{error}</div>;
+    }
+
     switch (viewMode) {
       case 'fullview':
         // Nicely formatted lyrics with chords above (chordsheetjs)
         if (rendered.type === 'chordsheet') {
-          return <div className="chordsheet" style={contentStyle} dangerouslySetInnerHTML={{ __html: rendered.html }} />;
+          return <div className="chordsheet" dangerouslySetInnerHTML={{ __html: rendered.html }} />;
         }
-        return <pre className="chords" style={contentStyle}>{content}</pre>;
+        return <pre className="chords">{content}</pre>;
       case 'chordpro':
         // Exact raw .chordpro file content
-        return <pre className="chords chordpro-raw" style={contentStyle}>{content}</pre>;
+        return <pre className="chords chordpro-raw">{content}</pre>;
       case 'chords':
         // Only chords, formatted for playing
-        return <div className="chords-only" style={contentStyle} dangerouslySetInnerHTML={{ __html: renderChordsOnly(content) }} />;
+        return <div className="chords-only" dangerouslySetInnerHTML={{ __html: renderChordsOnly(content) }} />;
       case 'lyrics':
       default:
         // Only lyrics, formatted for singing
-        return <div className="chords lyrics-only" style={contentStyle}>{rendered.lyrics}</div>;
+        return <div className="chords lyrics-only" dangerouslySetInnerHTML={{ __html: rendered.lyricsHtml }} />;
     }
   };
 
@@ -89,15 +94,13 @@ export default function SongDetail({ song, content, viewMode, onSetViewMode, onB
   return (
     <div className={`song-detail ${darkMode ? 'dark' : ''}`}>
       <div className="top-controls">
-        <button className="back-button" onClick={onBack}>
-          ← Back
-        </button>
         <div className="song-controls">
           <button 
             className={`control-button ${viewMode === 'fullview' ? 'active' : ''}`} 
             onClick={() => onSetViewMode('fullview')}
           >
-            FullView
+            <span className="label-full">FullView</span>
+            <span className="label-short">Full</span>
           </button>
           <button 
             className={`control-button ${viewMode === 'lyrics' ? 'active' : ''}`} 
@@ -115,7 +118,8 @@ export default function SongDetail({ song, content, viewMode, onSetViewMode, onB
             className={`control-button ${viewMode === 'chordpro' ? 'active' : ''}`} 
             onClick={() => onSetViewMode('chordpro')}
           >
-            ChordPro
+            <span className="label-full">ChordPro</span>
+            <span className="label-short">Pro</span>
           </button>
         </div>
         <div className="font-controls">
@@ -152,7 +156,10 @@ export default function SongDetail({ song, content, viewMode, onSetViewMode, onB
       
       {viewMode !== 'fullview' && <h2>{song.title}</h2>}
       {song.artist && <p className="artist">{song.artist}</p>}
-      <div className={`song-content ${viewMode === 'fullview' && rendered.type === 'chordsheet' ? 'mode-flex' : ''}`}>
+      <div
+        className={`song-content ${viewMode === 'fullview' && rendered.type === 'chordsheet' ? 'mode-flex' : ''}`}
+        style={contentStyle}
+      >
         {renderContent()}
       </div>
     </div>
