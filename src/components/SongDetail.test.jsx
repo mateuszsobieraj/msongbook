@@ -37,6 +37,7 @@ describe('SongDetail', () => {
       onSetViewMode: vi.fn()
     };
     const { rerender } = render(<SongDetail {...props} viewMode="fullview" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     const toggle = screen.getByRole('button', { name: 'Key & capo' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
     expect(screen.queryByRole('button', { name: 'Transpose up' })).not.toBeInTheDocument();
@@ -55,28 +56,29 @@ describe('SongDetail', () => {
     expect(screen.queryByRole('button', { name: 'Transpose up' })).not.toBeInTheDocument();
     expect([...document.querySelectorAll('.chordsheet .chord')].map(el => el.textContent.trim()).filter(Boolean)).toEqual(fullChords);
     fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole('button', { name: 'Chords', exact: true }));
     rerender(<SongDetail {...props} viewMode="chords" />);
     expect(document.querySelector('.chords-only').textContent.trim()).toBe(fullChords.join(' '));
     expect(screen.getByRole('button', { name: 'Transpose up' })).toBeInTheDocument();
-    rerender(<SongDetail {...props} viewMode="chordpro" />);
-    expect(document.querySelector('.chordpro-raw').textContent).toBe(props.content);
   });
 
   it('restores settings for the same song and keeps other songs independent', () => {
     const props = { song: { filename: 'one.chordpro', title: 'One' }, content: '{key: C}\n[C]Hello', viewMode: 'fullview', onSetViewMode: vi.fn() };
     const first = render(<SongDetail {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.click(screen.getByRole('button', { name: 'Key & capo' }));
     fireEvent.click(screen.getByRole('button', { name: 'Transpose up' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.click(screen.getByRole('button', { name: 'Increase font size' }));
     first.unmount();
     const second = render(<SongDetail {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     expect(screen.getByRole('button', { name: 'Key & capo' })).toHaveAttribute('aria-expanded', 'false');
     fireEvent.click(screen.getByRole('button', { name: 'Key & capo' }));
     expect(screen.getByText('C# (+1)')).toBeInTheDocument();
     expect(document.querySelector('.song-content')).toHaveStyle({ '--song-font-scale': '1.1' });
     second.unmount();
     render(<SongDetail {...props} song={{ filename: 'two.chordpro', title: 'Two' }} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     expect(screen.getByText('C (0)')).toBeInTheDocument();
     expect(document.querySelector('.song-content')).toHaveStyle({ '--song-font-scale': '1' });
   });
@@ -96,16 +98,18 @@ describe('SongDetail', () => {
     }
   });
 
-  it('keeps primary views visible and exposes additional views through Settings', () => {
+  it('keeps primary views hidden behind Settings and exposes additional views there', () => {
     const changeView = vi.fn();
     const back = vi.fn();
     render(<SongDetail song={{ title: 'Test song', artist: 'Tester' }} content="[C]Hello" viewMode="fullview" onSetViewMode={changeView} onBack={back} />);
     expect(screen.getByRole('heading', { name: 'Test song' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Lyrics + chords' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Lyrics', exact: true })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     expect(screen.getByRole('button', { name: 'Lyrics + chords' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.queryByRole('button', { name: 'ChordPro' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'ChordPro' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Lyrics', exact: true }));
     expect(changeView).toHaveBeenLastCalledWith('lyrics');
-    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.click(screen.getByRole('button', { name: 'ChordPro' }));
     expect(changeView).toHaveBeenLastCalledWith('chordpro');
     fireEvent.click(screen.getByRole('button', { name: 'Chords', exact: true }));

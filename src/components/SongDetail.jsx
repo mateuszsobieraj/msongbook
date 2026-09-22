@@ -106,10 +106,23 @@ export default function SongDetail({ song, content, isLoading = content === null
           <h2>{song.title}</h2>
           {song.artist && <p className="artist">{song.artist}</p>}
         </div>
-        <button className="control-button" aria-expanded={displaySettingsOpen} aria-controls={displaySettingsId} onClick={() => setDisplaySettingsOpen(open => !open)}>Settings</button>
+        <button
+          className="control-button settings-button"
+          aria-label="Settings"
+          title="Settings"
+          aria-expanded={displaySettingsOpen}
+          aria-controls={displaySettingsId}
+          onClick={() => setDisplaySettingsOpen(open => !open)}
+        >
+          <span className="hamburger" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
+        </button>
       </div>
-      <div className="top-controls">
-        <div className="song-controls">
+      <div className="display-settings" id={displaySettingsId} hidden={!displaySettingsOpen}>
+        <div className="song-controls" role="group" aria-label="Song views">
           <button 
             className={`control-button ${viewMode === 'fullview' ? 'active' : ''}`} 
             onClick={() => onSetViewMode('fullview')}
@@ -124,10 +137,6 @@ export default function SongDetail({ song, content, isLoading = content === null
           >
             Lyrics
           </button>
-        </div>
-      </div>
-      <div className="display-settings" id={displaySettingsId} hidden={!displaySettingsOpen}>
-        <div className="song-controls" role="group" aria-label="Additional song views">
           <button 
             className={`control-button ${viewMode === 'chords' ? 'active' : ''}`} 
             onClick={() => onSetViewMode('chords')}
@@ -143,6 +152,37 @@ export default function SongDetail({ song, content, isLoading = content === null
             ChordPro
           </button>
         </div>
+
+        {(viewMode === 'fullview' || viewMode === 'chords') && !isLoading && !error && parsedSong && (
+          <div className="transpose-settings">
+            <button
+              type="button"
+              className="control-button transpose-toggle"
+              aria-expanded={settingsOpen}
+              aria-controls={settingsId}
+              aria-label="Key & capo"
+              onClick={() => setSettingsOpen(open => !open)}
+            >
+              Key &amp; capo · {rendered.soundingKey || 'Unknown'} · capo {capo} <span aria-hidden="true">{settingsOpen ? '▴' : '▾'}</span>
+            </button>
+            <div id={settingsId} className="transpose-controls" hidden={!settingsOpen}>
+              <div className="transpose-group">
+                <span>Sounding key:</span>
+                <button aria-label="Transpose down" disabled={transpose <= -12} onClick={() => handleTranspose(-1)}>-</button>
+                <span className="transpose-value" aria-live="polite">{rendered.soundingKey || 'Unknown'} ({transpose > 0 ? `+${transpose}` : transpose})</span>
+                <button aria-label="Transpose up" disabled={transpose >= 12} onClick={() => handleTranspose(1)}>+</button>
+              </div>
+              <div className="transpose-group">
+                <span>Capo:</span>
+                <button aria-label="Decrease capo" disabled={capo <= 0} onClick={() => handleCapo(-1)}>-</button>
+                <span className="transpose-value" aria-live="polite">{capo}</span>
+                <button aria-label="Increase capo" disabled={capo >= 8} onClick={() => handleCapo(1)}>+</button>
+              </div>
+              <span>Chord shapes: {rendered.shapesKey || 'Unknown'}</span>
+            </div>
+          </div>
+        )}
+
         <div className="font-controls" role="group" aria-label="Text size and appearance">
           <button className="font-button" onClick={decreaseFont} title="Decrease font size" aria-label="Decrease font size" disabled={fontSizeScale <= 0.6}>−</button>
           <button className="font-button" onClick={resetFont} title="Reset font size" aria-label="Reset font size">A</button>
@@ -158,36 +198,6 @@ export default function SongDetail({ song, content, isLoading = content === null
           </button>
         </div>
       </div>
-      
-      {(viewMode === 'fullview' || viewMode === 'chords') && !isLoading && !error && parsedSong && (
-        <div className="transpose-settings">
-          <button
-            type="button"
-            className="control-button transpose-toggle"
-            aria-expanded={settingsOpen}
-            aria-controls={settingsId}
-            aria-label="Key & capo"
-            onClick={() => setSettingsOpen(open => !open)}
-          >
-            Key &amp; capo · {rendered.soundingKey || 'Unknown'} · capo {capo} <span aria-hidden="true">{settingsOpen ? '▴' : '▾'}</span>
-          </button>
-          <div id={settingsId} className="transpose-controls" hidden={!settingsOpen}>
-          <div className="transpose-group">
-            <span>Sounding key:</span>
-            <button aria-label="Transpose down" disabled={transpose <= -12} onClick={() => handleTranspose(-1)}>-</button>
-            <span className="transpose-value" aria-live="polite">{rendered.soundingKey || 'Unknown'} ({transpose > 0 ? `+${transpose}` : transpose})</span>
-            <button aria-label="Transpose up" disabled={transpose >= 12} onClick={() => handleTranspose(1)}>+</button>
-          </div>
-          <div className="transpose-group">
-            <span>Capo:</span>
-            <button aria-label="Decrease capo" disabled={capo <= 0} onClick={() => handleCapo(-1)}>-</button>
-            <span className="transpose-value" aria-live="polite">{capo}</span>
-            <button aria-label="Increase capo" disabled={capo >= 8} onClick={() => handleCapo(1)}>+</button>
-          </div>
-          <span>Chord shapes: {rendered.shapesKey || 'Unknown'}</span>
-          </div>
-        </div>
-      )}
       
       <div
         className={`song-content ${viewMode === 'fullview' && rendered.type === 'chordsheet' ? 'mode-flex' : ''}`}
