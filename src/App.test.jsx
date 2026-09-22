@@ -11,11 +11,12 @@ vi.mock('./components/SongList.jsx', () => ({
 }));
 
 vi.mock('./components/SongDetail.jsx', () => ({
-  default: ({ song, content, isLoading, error, viewMode, onSetViewMode }) => (
+  default: ({ song, content, isLoading, error, viewMode, onSetViewMode, onRetry }) => (
     <div data-testid="mock-song-detail">
       <div>{song?.title}</div>
       <div>{isLoading ? 'Loading song' : content}</div>
       <div>{error}</div>
+      {error && <button onClick={onRetry}>Try again</button>}
       <button onClick={() => onSetViewMode('lyrics')}>Lyrics</button>
     </div>
   )
@@ -23,6 +24,9 @@ vi.mock('./components/SongDetail.jsx', () => ({
 
 describe('App', () => {
   beforeEach(() => {
+    localStorage.clear();
+    window.history.replaceState(null, '', '/');
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
     vi.stubGlobal('fetch', vi.fn(async (url) => {
       if (url.endsWith('/songs/index.json')) {
         return Response.json([
@@ -45,6 +49,7 @@ describe('App', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     document.body.className = '';
   });
 
@@ -89,5 +94,54 @@ describe('App', () => {
     });
 
     expect(screen.getByTestId('mock-song-list')).toHaveTextContent('Songs:0:jazz');
+  });
+
+  it('opens a song from a direct link and responds to history navigation', async () => {
+    window.history.replaceState(null, '', '/#/song/test.chordpro');
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('mock-song-detail')).toHaveTextContent('Hello'));
+    window.history.replaceState(null, '', '/#/');
+    fireEvent(window, new HashChangeEvent('hashchange'));
+    expect(screen.getByTestId('mock-song-list')).toBeInTheDocument();
+  });
+
+  it('keeps the search when returning from a song', async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('mock-song-list')).toHaveTextContent('Songs:1:'));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search songs' }), { target: { value: 'banjo' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Select' }));
+    expect(window.location.hash).toBe('#/song/test.chordpro');
+    fireEvent.click(screen.getByRole('button', { name: 'Go to song list' }));
+    expect(screen.getByRole('textbox', { name: 'Search songs' })).toHaveValue('banjo');
+  });
+
+  it('shows an index error and recovers on retry', async () => {
+    fetch.mockRejectedValueOnce(new Error('Offline'));
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<App />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load the song list');
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await waitFor(() => expect(screen.getByTestId('mock-song-list')).toHaveTextContent('Songs:1:'));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('handles an unknown song link without pretending the library is empty', async () => {
+    window.history.replaceState(null, '', '/#/song/missing.chordpro');
+    render(<App />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('This song is not in the songbook');
+    fireEvent.click(screen.getByRole('button', { name: 'Back to songs' }));
+    expect(screen.getByTestId('mock-song-list')).toHaveTextContent('Songs:1:');
+  });
+
+  it('rejects app HTML returned as song content and lets the user retry', async () => {
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId('mock-song-list')).toHaveTextContent('Songs:1:'));
+    fetch.mockResolvedValueOnce(new Response('<!doctype html><html>App</html>', { headers: { 'content-type': 'text/html' } }));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    fireEvent.click(screen.getByRole('button', { name: 'Select' }));
+    expect(await screen.findByText('Could not load this song.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await waitFor(() => expect(screen.getByTestId('mock-song-detail')).toHaveTextContent('Hello'));
+    expect(screen.queryByText('Could not load this song.')).not.toBeInTheDocument();
   });
 });

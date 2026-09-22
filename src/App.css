@@ -5,8 +5,7 @@
 }
 
 :root {
-  --font-size-base: 1rem;
-  --chordsheeet-font-size: 1rem;
+  color-scheme: light;
 }
 
 body {
@@ -23,7 +22,7 @@ body {
 }
 
 /* Header */
-header {
+.app-header {
   margin-bottom: 30px;
 }
 
@@ -68,37 +67,6 @@ header {
   flex: 1;
 }
 
-.filter-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 0;
-}
-
-.filter-btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 24px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.3);
-}
-
-.filter-btn:hover {
-  background: rgba(255,255,255,0.25);
-  border-color: rgba(255,255,255,0.5);
-}
-
-.filter-btn.active {
-  background: #4a5adf;
-  border-color: #4a5adf;
-  box-shadow: 0 4px 15px rgba(74, 90, 223, 0.4);
-}
-
 /* Keep the brand and search field on one line in list view. */
 body:not(.song-open) .brand {
   flex-direction: row;
@@ -108,6 +76,7 @@ body:not(.song-open) .brand {
 
 body:not(.song-open) .brand-left {
   justify-content: flex-start;
+  flex-shrink: 0;
 }
 
 body:not(.song-open) .brand-left h1 {
@@ -117,11 +86,7 @@ body:not(.song-open) .brand-left h1 {
 
 body:not(.song-open) .brand-right {
   width: auto;
-}
-
-body:not(.song-open) .filter-buttons {
-  justify-content: flex-start;
-  margin-bottom: 16px;
+  min-width: 0;
 }
 
 body:not(.song-open) .search-box {
@@ -130,18 +95,9 @@ body:not(.song-open) .search-box {
 
 body:not(.song-open) .search-box input {
   width: 100%;
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   padding: 16px 24px;
   border-radius: 28px;
-}
-
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  body:not(.song-open) .search-box input {
-    padding: 18px 20px;
-    font-size: 1.25rem;
-  }
-  .filter-btn { padding: 8px 16px; font-size: 0.9rem; }
 }
 
 /* Search */
@@ -170,11 +126,6 @@ body:not(.song-open) .search-box input {
 }
 
 body.song-open .brand { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; }
-body:not(.song-open) .brand { flex-direction: row; align-items: center; text-align: left; }
-body:not(.song-open) .brand-left { justify-content: flex-start; flex-shrink: 0; }
-body:not(.song-open) .brand-right { width: auto; min-width: 0; }
-body:not(.song-open) .search-box { max-width: 700px; width: min(700px, 100%); }
-body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
 
 /* Mobile search adjustments */
 @media (max-width: 600px) {
@@ -213,7 +164,7 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
 
 .song-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: 16px;
 }
 
@@ -265,7 +216,7 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
   padding: 16px;
   box-shadow: 0 2px 15px rgba(0,0,0,0.08);
   animation: slideUp 0.3s ease;
-  overflow: hidden;
+  overflow: visible;
 }
 
 @keyframes slideUp {
@@ -308,7 +259,7 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
 .control-button,
 .font-button {
   padding: 8px 16px;
-  background: #667eea;
+  background: #4054b8;
   color: white;
   border: none;
   border-radius: 8px;
@@ -316,13 +267,16 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
   font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.2s;
-  white-space: nowrap;
+  white-space: normal;
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .back-button:hover,
 .control-button:hover,
 .font-button:hover {
-  background: #5568d3;
+  background: #324394;
   transform: translateY(-1px);
 }
 
@@ -332,7 +286,7 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
 }
 
 .font-button {
-  min-width: 40px;
+  min-width: 44px;
   font-size: 1.2rem;
   font-weight: 700;
   display: flex;
@@ -368,8 +322,8 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
 
 .chordsheet .row {
   display: flex;
-  flex-wrap: nowrap;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  align-items: flex-start;
   width: 100%;
 }
 
@@ -377,7 +331,10 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  white-space: pre;
+  min-width: 0;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .chordsheet .chord {
@@ -468,6 +425,10 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
 }
 
 /* Transpose controls */
+.transpose-toggle { margin-bottom: 12px; }
+
+.transpose-controls[hidden] { display: none; }
+
 .transpose-controls {
   display: flex;
   gap: 16px;
@@ -485,15 +446,46 @@ body:not(.song-open) .search-box input { width: 100%; font-size: 1.25rem; }
   gap: 6px;
 }
 
-.transpose-group label {
+.transpose-group > span:first-child {
   font-size: 0.95rem;
   font-weight: 600;
   color: #495057;
 }
 
+.back-button { margin-bottom: 12px; }
+
+.empty-state {
+  padding: 24px;
+  border-radius: 8px;
+  background: #f8f9fa;
+  color: #212529;
+  line-height: 1.6;
+}
+
+.empty-state button { margin-top: 12px; }
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
+button:focus-visible, [role="button"]:focus-visible {
+  outline: 3px solid #d6336c;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 .transpose-group button {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border: 1px solid #adb5bd;
   background: white;
   border-radius: 4px;
@@ -524,7 +516,7 @@ body.song-open .app {
   margin: 0;
   padding: 0 8px;
 }
-body.song-open .song-detail.dark {
+.song-detail.dark {
   background: #1a1a2e;
   color: #e0e0e0;
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
@@ -593,121 +585,90 @@ body.song-open .song-detail.dark {
   color: #c586c0;
 }
 
-/* Mobile dark mode */
-@media (max-width: 600px) {
-  body.song-open { padding: 4px; }
-  .song-detail.dark { padding: 12px; }
+.song-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 8px 0;
+  margin-bottom: 8px;
 }
 
-/* Mobile song style */
-@media (max-width: 600px) {
+.song-toolbar .back-button { margin: 0; flex: 0 0 44px; padding: 8px; }
+.song-heading { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.song-heading h2 { font-size: 1.25rem; line-height: 1.3; }
+.song-heading .artist { font-size: 0.9rem; margin: 0; }
+
+.display-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #eef0f8;
+  border-radius: 8px;
+  scroll-margin-top: 100px;
+}
+
+.display-settings[hidden] { display: none; }
+.song-controls, .font-controls { flex-wrap: wrap; }
+.chordsheet .title, .chordsheet .subtitle { display: none; }
+.lyrics-only, .chords-only, .song-content > pre { overflow-wrap: anywhere; }
+.song-content > pre { white-space: pre-wrap; }
+.transpose-group { flex-wrap: wrap; max-width: 100%; }
+
+.song-detail.dark .song-toolbar { background: #1a1a2e; }
+.song-detail.dark .display-settings,
+.song-detail.dark .transpose-controls,
+.song-detail.dark .empty-state { background: #222e49; color: #f1f5f9; }
+.song-detail.dark .transpose-group > span:first-child,
+.song-detail.dark .transpose-value { color: #f1f5f9; }
+.song-detail.dark .transpose-group button { background: #344563; color: #fff; border-color: #7f91b0; }
+.song-detail.dark .transpose-group button:hover { background: #425879; }
+
+/* Compact layout covers phones in portrait and landscape. */
+@media (max-width: 900px) {
+  body.song-open .app-header { display: none; }
   body.song-open .app {
-    padding: 0;
+    padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
   }
 
-  .song-detail {
-    border-radius: 8px;
-    padding: 10px;
+  .song-detail { border-radius: 8px; padding: 8px; }
+  .song-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    gap: 8px;
+    border-bottom: 1px solid #cbd2df;
+    padding-top: max(8px, env(safe-area-inset-top));
   }
-
-  .song-detail h2 {
-    font-size: 1.4rem;
-  }
-  .song-detail .artist {
-    font-size: 1rem;
-  }
-
-  .top-controls {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 4px;
-  }
-  
-  .song-controls {
-    display: flex;
-    flex-wrap: nowrap;
-    flex: 1 1 auto;
-    gap: 3px;
-    min-width: 0;
-    width: auto;
-  }
-  
-  .font-controls {
-    flex: 0 0 auto;
-    gap: 3px;
-    justify-content: flex-end;
-    width: auto;
-  }
-
-  .control-button {
-    flex: 1 1 0;
-    min-width: 0;
-    text-align: center;
-    padding: 8px 3px;
-    font-size: 0.76rem;
-  }
-
-  .font-button {
-    flex: 0 0 30px;
-    min-width: 30px;
-    padding: 8px 0;
-    font-size: 1rem;
-  }
-
-  .label-full {
-    display: none;
-  }
-
-  .label-short {
-    display: inline;
-  }
-  
+  .song-heading h2 { font-size: 1.05rem; }
+  .top-controls { margin-bottom: 8px; }
+  .song-controls { flex: 1; gap: 8px; min-width: 0; }
+  .font-controls { gap: 8px; }
+  .control-button { text-align: center; padding: 10px 12px; font-size: 0.95rem; }
+  .song-controls .control-button { flex: 1; }
+  .song-toolbar > .control-button { flex-shrink: 0; }
+  .font-button { padding: 8px; font-size: 1.1rem; }
   .song-content {
     --song-readable-font-size: calc(1.1rem * var(--song-font-scale, 1));
-    overflow-x: hidden;
-    padding: 10px;
+    padding: 8px;
   }
-
-  .song-content.mode-flex {
-    white-space: normal;
-  }
-
-  .chordsheet {
-    line-height: 1.35;
-  }
-
-  .chordsheet .row {
-    display: block;
-  }
-
-  .chordsheet .column {
-    display: inline-flex;
-    flex-shrink: 1;
-    min-width: 0;
-    vertical-align: bottom;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-  }
-
-  .chordsheet .lyrics {
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-  }
-
-  .chordsheet .chord {
-    min-height: 1.15em;
-    margin-bottom: 0.08em;
-  }
-
-  .chordsheet .paragraph.chorus,
-  .lyrics-chorus {
+  .chordsheet { line-height: 1.45; }
+  .chordsheet .chord { min-height: 1.15em; margin-bottom: 0.08em; }
+  .chordsheet .paragraph.chorus, .lyrics-chorus {
     border-left-width: 3px;
     margin: 0.25em 0 0.65em;
     padding: 0.45em 0.55em;
   }
+  .lyrics-only { line-height: 1.55; }
+  .transpose-group { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; width: 100%; }
+  .transpose-group > span:first-child { grid-column: 1 / -1; }
+}
 
-  .lyrics-only {
-    line-height: 1.55;
-  }
+@media (max-width: 600px) {
+  .app { padding: 12px; }
+  .song-card { padding: 14px 16px; }
+  .song-grid { gap: 10px; }
 }

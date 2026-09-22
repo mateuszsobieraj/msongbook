@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,18 +12,6 @@
             Loading MSongbook...
         </div>
     </div>
-    <script>
-        window.setTimeout(function () {
-            var isPages = window.location.hostname.endsWith("github.io");
-            var isFallbackRoot = !window.location.pathname.includes("/dist/");
-            var root = document.getElementById("root");
-            var stillLoading = root && root.textContent.includes("Loading MSongbook");
-
-            if (isPages && isFallbackRoot && stillLoading) {
-                window.location.replace("./dist/");
-            }
-        }, 4000);
-    </script>
     <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

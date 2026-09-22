@@ -18,12 +18,10 @@ export function renderLyricsOnlyHtml(rawText) {
 
   const html = [];
   let isInChorus = false;
-  let pendingChorusLabel = '';
 
   const openChorus = () => {
     if (isInChorus) return;
     html.push('<div class="lyrics-chorus">');
-    pendingChorusLabel = '';
     isInChorus = true;
   };
 
@@ -38,14 +36,11 @@ export function renderLyricsOnlyHtml(rawText) {
 
     if (directive) {
       const name = directive[1].trim().toLowerCase();
-      const value = (directive[2] || '').trim();
 
       if (name === 'start_of_chorus' || name === 'soc') {
         openChorus();
       } else if (name === 'end_of_chorus' || name === 'eoc') {
         closeChorus();
-      } else if ((name === 'comment' || name === 'c') && /^chorus\b/i.test(value)) {
-        pendingChorusLabel = value;
       }
       return;
     }
@@ -92,6 +87,10 @@ export function renderChordsOnly(rawText) {
   return trimmed.map(l => 
     l ? `<div class="chords-only-line">${escapeHtml(l)}</div>` : '<div class="chords-only-line empty"></div>'
   ).join('');
+}
+
+export function renderSongChords(song) {
+  return renderChordsOnly(new ChordSheetJS.ChordProFormatter().format(song));
 }
 
 // Parse ChordPro text to chordsheetjs Song object

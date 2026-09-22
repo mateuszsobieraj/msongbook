@@ -42,7 +42,6 @@ function generateSongIndex(songsDir, outputFile) {
 
   const songs = files.map((file) => {
     const filePath = path.join(songsDir, file);
-    const stats = fs.statSync(filePath);
     const content = fs.readFileSync(filePath, 'utf8');
 
     // Extract title from {title: ...} directive
@@ -68,8 +67,7 @@ function generateSongIndex(songsDir, outputFile) {
       artist: artist,
       genres: genres,
       tags: tags,
-      speed: speed,
-      lastModified: stats.mtime.toISOString()
+      speed: speed
     };
   });
 

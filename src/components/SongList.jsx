@@ -59,6 +59,7 @@ export default function SongList({ songs, query, onSelect, isLoading }) {
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
                     onSelect(song);
                   }
                 }}
